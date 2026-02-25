@@ -194,7 +194,7 @@ When given an image, return a JSON object:
 }
 
 CRITICAL RULES:
-- category_en MUST exactly match one from CATEGORIES list
+- category_en MUST exactly match one from CATEGORIES list — IDENTIFY THE ACTUAL GARMENT TYPE by its silhouette, structure, length, and design. DO NOT default to "ABAYA". Examples: a long coat-like garment = COAT, a two-piece set = CO-ORD SET, a head covering = HIJAB/KHIMAR/NIQAAB, a loose flowing dress = KAFTAN/FARASHA, a fitted top = KURTI/BLOUSE, pants = TROUSER/PALAZZO, a prayer outfit = PRAYER SET, etc.
 - fabric_name_en MUST exactly match one from FABRICS list — IDENTIFY THE ACTUAL FABRIC, do not default to Nida
 - embellishment_en MUST exactly match one from EMBELLISHMENTS list
 - product_name = category_en + " — " + fabric_name_en + " — " + embellishment_en
@@ -214,7 +214,7 @@ CRITICAL RULES:
           {
             role: "user",
             content: [
-              { type: "text", text: "Analyze this burqa/abaya image and return ONLY the JSON object with no extra text." },
+              { type: "text", text: "Analyze this garment/fabric image. Identify the EXACT category from the CATEGORIES list based on what you SEE — do NOT default to ABAYA. Determine the garment type by its silhouette, structure, and design features. Return ONLY the JSON object with no extra text." },
               { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
             ],
           },
