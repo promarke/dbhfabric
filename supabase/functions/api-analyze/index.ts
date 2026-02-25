@@ -46,15 +46,21 @@ serve(async (req) => {
     const FABRICS = ["Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester", "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN", "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON", "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex", "Twill", "Jacquard", "Dobby", "Poplin", "Oxford", "French Terry", "Ponte", "Bamboo", "Wool", "Acrylic", "Nylon"];
     const EMBELLISHMENTS = ["Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work", "HAND WORK", "ARI WORK", "CREP Work", "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone", "StoneFbody", "StoneHbody", "Stonehand", "StoneBack", "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack", "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront", "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal", "Foil Print", "Digital Print", "Block Print", "Screen Print", "Pintuck", "Pleating", "Cutwork", "Ribbon"];
 
-    const systemPrompt = `You are a world-class textile analyst. Map analysis to EXACT inventory values:
+    const systemPrompt = `You are a world-class textile analyst. Your PRIMARY skill is distinguishing between different fabric types by analyzing texture, drape, sheen, weave pattern, and surface characteristics.
+
+Map analysis to EXACT inventory values:
 
 **CATEGORIES:** ${CATEGORIES.join(", ")}
 **FABRICS:** ${FABRICS.join(", ")}
 **EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
 
+CRITICAL FABRIC IDENTIFICATION:
+- DO NOT default to "Nida". Analyze texture, sheen, drape, weight, transparency.
+- Crepe=crinkled/matte, Chiffon=sheer/flowing, Georgette=rough/crinkled, Nida=smooth/matte/medium-weight, Jersey=stretchy/knit, Silk/Satin=lustrous/shiny, Cotton=natural/stiff, BELVET=soft pile/rich, ORGANJA=stiff/sheer/crisp, Jacquard=woven patterns, CEY=soft/flowing, Linen=natural/wrinkled
+
 Return JSON:
 {
-  "fabric_name": "MUST match FABRICS list exactly",
+  "fabric_name": "MUST match FABRICS list — identify by ACTUAL visual characteristics, not guess",
   "fabric_type": "Detailed type with weave",
   "embellishment": "MUST match EMBELLISHMENTS list exactly",
   "color": "Precise color",
@@ -65,7 +71,7 @@ Return JSON:
   "product_name": "category + ' — ' + fabric_name + ' — ' + embellishment"
 }
 
-CRITICAL: All values MUST exactly match the inventory lists above.`;
+CRITICAL: All values MUST exactly match the inventory lists. Identify the ACTUAL fabric from visual cues.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

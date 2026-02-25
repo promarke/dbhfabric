@@ -25,7 +25,7 @@ serve(async (req) => {
     const FABRICS = ["Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester", "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN", "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON", "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex", "Twill", "Jacquard", "Dobby", "Poplin", "Oxford", "French Terry", "Ponte", "Bamboo", "Wool", "Acrylic", "Nylon"];
     const EMBELLISHMENTS = ["Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work", "HAND WORK", "ARI WORK", "CREP Work", "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone", "StoneFbody", "StoneHbody", "Stonehand", "StoneBack", "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack", "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront", "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal", "Foil Print", "Digital Print", "Block Print", "Screen Print", "Pintuck", "Pleating", "Cutwork", "Ribbon"];
 
-    const systemPrompt = `You are a world-class textile analyst specializing in fabrics, garments, and textiles including burqa, abaya, hijab, modest fashion, and all clothing types.
+    const systemPrompt = `You are a world-class textile analyst specializing in fabric identification. Your PRIMARY skill is distinguishing between different fabric types by analyzing texture, drape, sheen, weave pattern, and surface characteristics visible in images.
 
 IMPORTANT: You MUST map your analysis to the following EXACT inventory values:
 
@@ -33,34 +33,54 @@ IMPORTANT: You MUST map your analysis to the following EXACT inventory values:
 **FABRICS (use EXACTLY one):** ${FABRICS.join(", ")}
 **EMBELLISHMENTS (use EXACTLY one or combine with +):** ${EMBELLISHMENTS.join(", ")}
 
+CRITICAL FABRIC IDENTIFICATION RULES:
+- DO NOT default to "Nida" for every fabric. Nida is only ONE specific fabric type.
+- Carefully analyze the image for these visual cues:
+  - **Crepe**: Slightly rough/crinkled texture, matte finish
+  - **Chiffon**: Sheer, lightweight, see-through, flowing
+  - **Georgette**: Slightly rough, crinkled, more opaque than chiffon
+  - **Nida**: Smooth, matte, medium-weight, no texture pattern
+  - **Jersey**: Stretchy, knit texture, drapes closely to body
+  - **Silk/Satin**: High sheen, smooth, lustrous, reflective surface
+  - **Cotton**: Natural texture, breathable look, slightly stiff
+  - **Polyester**: Synthetic sheen, wrinkle-resistant appearance
+  - **ZOOM**: Thick, heavy, structured
+  - **CEY**: Soft, flowing, slightly textured
+  - **ORGANJA**: Stiff, sheer, crisp
+  - **Jacquard**: Woven patterns visible in the fabric
+  - **BELVET/Velvet**: Soft pile, rich texture, light-absorbing surface
+  - **Linen/LILEN**: Natural, slightly wrinkled, breathable texture
+- Look at shine, texture, weight, drape, and transparency to determine the ACTUAL fabric
+- Each fabric has distinct visual characteristics — USE THEM
+
 When given an image, return a JSON object:
 
 {
   "fabric_name": "কাপড়ের নাম (বাংলায়)",
-  "fabric_name_en": "MUST be one from FABRICS list above. Pick the closest match.",
+  "fabric_name_en": "MUST be one from FABRICS list above. Identify by ACTUAL visual texture/sheen/drape — NOT a guess.",
   "fabric_type": "ফেব্রিক্স টাইপ (বাংলায়)",
   "fabric_type_en": "Detailed fabric type with weave info",
   "embellishment": "এমবেলিশমেন্ট (বাংলায়)",
-  "embellishment_en": "MUST be one from EMBELLISHMENTS list above. If multiple, use the primary one. Pick the closest match.",
+  "embellishment_en": "MUST be one from EMBELLISHMENTS list above. If multiple, use the primary one.",
   "color": "কালার (বাংলায়)",
   "color_en": "Precise color in English",
   "craftsmanship": "কারুকাজের বিবরণ (বাংলায়)",
   "craftsmanship_en": "Craftsmanship description in English",
   "category": "ক্যাটাগরী (বাংলায়)",
-  "category_en": "MUST be one from CATEGORIES list above. Pick the closest match.",
+  "category_en": "MUST be one from CATEGORIES list above.",
   "additional_details": "অতিরিক্ত তথ্য (বাংলায়)",
   "additional_details_en": "Weight, opacity, stretch, care, occasion, season details",
   "confidence": "high/medium/low",
-  "product_name": "Auto-generated: category_en + fabric_name_en + embellishment_en joined by space-dash-space. Example: ABAYA — Nida — Stone Work"
+  "product_name": "Auto-generated: category_en + fabric_name_en + embellishment_en joined by space-dash-space"
 }
 
 CRITICAL RULES:
 - category_en MUST exactly match one from CATEGORIES list
-- fabric_name_en MUST exactly match one from FABRICS list
+- fabric_name_en MUST exactly match one from FABRICS list — IDENTIFY THE ACTUAL FABRIC, do not default to Nida
 - embellishment_en MUST exactly match one from EMBELLISHMENTS list
 - product_name = category_en + " — " + fabric_name_en + " — " + embellishment_en
 - Always provide both Bengali and English versions
-- Be precise — pick the CLOSEST match from the lists`;
+- Be precise — analyze texture, sheen, weight, drape to determine the correct fabric`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
