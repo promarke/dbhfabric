@@ -43,7 +43,21 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const CATEGORIES = ["ABAYA", "ABAYA 2P", "FARASHA", "FARASHA 2P", "BLAZER", "BORKA", "KOTI", "INNER", "HIJAB", "URNA", "NIQAAB", "KHIMAR", "JILBAB", "KAFTAN", "COAT", "PRAYER SET", "SAREE", "KURTI", "GOWN", "MAXI"];
-    const FABRICS = ["Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester", "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN", "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON", "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex", "Twill", "Jacquard", "Dobby", "Poplin", "Oxford", "French Terry", "Ponte", "Bamboo", "Wool", "Acrylic", "Nylon"];
+    const FABRICS = [
+      "Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester",
+      "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN",
+      "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON",
+      "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex",
+      "Twill", "Jacquard", "Dobby", "Poplin", "Oxford",
+      "French Terry", "Ponte", "Interlock", "Rib Knit", "Pique",
+      "Bamboo", "Wool", "Acrylic", "Nylon", "Hemp", "Jute", "Ramie",
+      "Muslin", "Lawn", "Voile", "Batiste", "Cambric", "Challis", "Charmeuse",
+      "Damask", "Dupioni", "Faille", "Flannel", "Fleece", "Gabardine", "Habotai",
+      "Mikado", "Organza", "Taffeta", "Tulle", "Velour",
+      "Brocade", "Canvas", "Denim", "Drill", "Duck", "Sateen",
+      "Chambray", "Corduroy", "Crepe de Chine", "Duchess Satin",
+      "Mesh", "Net", "Scuba", "Terry Cloth", "Waffle Knit"
+    ];
     const EMBELLISHMENTS = ["Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work", "HAND WORK", "ARI WORK", "CREP Work", "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone", "StoneFbody", "StoneHbody", "Stonehand", "StoneBack", "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack", "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront", "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal", "Foil Print", "Digital Print", "Block Print", "Screen Print", "Pintuck", "Pleating", "Cutwork", "Ribbon"];
 
     const systemPrompt = `You are a world-class textile analyst. Your PRIMARY skill is distinguishing between different fabric types by analyzing texture, drape, sheen, weave pattern, and surface characteristics.
@@ -54,9 +68,15 @@ Map analysis to EXACT inventory values:
 **FABRICS:** ${FABRICS.join(", ")}
 **EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
 
-CRITICAL FABRIC IDENTIFICATION:
-- DO NOT default to "Nida". Analyze texture, sheen, drape, weight, transparency.
-- Crepe=crinkled/matte, Chiffon=sheer/flowing, Georgette=rough/crinkled, Nida=smooth/matte/medium-weight, Jersey=stretchy/knit, Silk/Satin=lustrous/shiny, Cotton=natural/stiff, BELVET=soft pile/rich, ORGANJA=stiff/sheer/crisp, Jacquard=woven patterns, CEY=soft/flowing, Linen=natural/wrinkled
+CRITICAL FABRIC IDENTIFICATION — Analyze texture, sheen, drape, weight, transparency:
+- DO NOT default to "Nida". Nida is ONLY smooth/matte/medium-weight with zero texture.
+- Sheer: Chiffon(flowing), Georgette(crinkled), Voile(crisp), Organza(stiff), Tulle(net-like), Net/Mesh(open weave), Batiste(ultra-fine)
+- Medium: Crepe(crinkled/matte), Crepe de Chine(smooth crepe), Cotton(natural/stiff), Lawn(fine cotton), Muslin(soft/loose), Cambric(fine/luster), Poplin(ribbed), Chambray(denim-like lighter), Challis(fluid), Viscose/Rayon(silk-like drape), Modal(very soft), Tencel(smooth/cool)
+- Heavy: ZOOM(thick/structured), Gabardine(twill/firm), Twill(diagonal), Denim(heavy twill), Canvas(sturdy), Scuba(neoprene-like)
+- Lustrous: Silk(natural glow), Satin/Sateen(reflective), Charmeuse(drapey/luster), Duchess Satin(heavy/stiff), Taffeta(crisp/sheen), Dupioni(nubby/lustrous), Habotai(soft luster), Mikado(subtle sheen), Faille(ribbed/sheen)
+- Textured: Jacquard(woven patterns), Brocade(raised patterns), Damask(reversible), Dobby(geometric), BELVET/Velvet/Velour(pile), Corduroy(ridges), Linen(wrinkled), Flannel(brushed), Fleece(fuzzy)
+- Knit: Jersey(stretchy), Ponte(structured stretch), Interlock(smooth knit), Rib Knit(ribbed), French Terry(looped back), Pique(diamond texture), Waffle Knit(grid)
+- NEVER guess — if unsure, use "medium" confidence
 
 Return JSON:
 {

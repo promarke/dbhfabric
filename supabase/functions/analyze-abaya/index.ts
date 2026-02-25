@@ -22,7 +22,28 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const CATEGORIES = ["ABAYA", "ABAYA 2P", "FARASHA", "FARASHA 2P", "BLAZER", "BORKA", "KOTI", "INNER", "HIJAB", "URNA", "NIQAAB", "KHIMAR", "JILBAB", "KAFTAN", "COAT", "PRAYER SET", "SAREE", "KURTI", "GOWN", "MAXI"];
-    const FABRICS = ["Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester", "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN", "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON", "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex", "Twill", "Jacquard", "Dobby", "Poplin", "Oxford", "French Terry", "Ponte", "Bamboo", "Wool", "Acrylic", "Nylon"];
+    const FABRICS = [
+      // Classic fabrics
+      "Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester",
+      // Local/Trade fabrics
+      "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN",
+      "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON",
+      // Premium fabrics
+      "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex",
+      // Woven fabrics
+      "Twill", "Jacquard", "Dobby", "Poplin", "Oxford",
+      // Knit & Stretch fabrics
+      "French Terry", "Ponte", "Interlock", "Rib Knit", "Pique",
+      // Natural fabrics
+      "Bamboo", "Wool", "Acrylic", "Nylon", "Hemp", "Jute", "Ramie",
+      // NEW: Additional fabrics (75+ total)
+      "Muslin", "Lawn", "Voile", "Batiste", "Cambric", "Challis", "Charmeuse",
+      "Damask", "Dupioni", "Faille", "Flannel", "Fleece", "Gabardine", "Habotai",
+      "Mikado", "Organza", "Taffeta", "Tulle", "Velour",
+      "Brocade", "Canvas", "Denim", "Drill", "Duck", "Sateen",
+      "Chambray", "Corduroy", "Crepe de Chine", "Duchess Satin",
+      "Mesh", "Net", "Scuba", "Terry Cloth", "Waffle Knit"
+    ];
     const EMBELLISHMENTS = ["Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work", "HAND WORK", "ARI WORK", "CREP Work", "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone", "StoneFbody", "StoneHbody", "Stonehand", "StoneBack", "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack", "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront", "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal", "Foil Print", "Digital Print", "Block Print", "Screen Print", "Pintuck", "Pleating", "Cutwork", "Ribbon"];
 
     const systemPrompt = `You are a world-class textile analyst specializing in fabric identification. Your PRIMARY skill is distinguishing between different fabric types by analyzing texture, drape, sheen, weave pattern, and surface characteristics visible in images.
@@ -36,22 +57,90 @@ IMPORTANT: You MUST map your analysis to the following EXACT inventory values:
 CRITICAL FABRIC IDENTIFICATION RULES:
 - DO NOT default to "Nida" for every fabric. Nida is only ONE specific fabric type.
 - Carefully analyze the image for these visual cues:
-  - **Crepe**: Slightly rough/crinkled texture, matte finish
-  - **Chiffon**: Sheer, lightweight, see-through, flowing
+
+  **SHEER/LIGHTWEIGHT fabrics:**
+  - **Chiffon**: Sheer, lightweight, see-through, flowing, delicate
   - **Georgette**: Slightly rough, crinkled, more opaque than chiffon
-  - **Nida**: Smooth, matte, medium-weight, no texture pattern
-  - **Jersey**: Stretchy, knit texture, drapes closely to body
-  - **Silk/Satin**: High sheen, smooth, lustrous, reflective surface
+  - **Voile**: Very lightweight, semi-sheer, crisp hand feel
+  - **Organza/ORGANJA**: Stiff, sheer, crisp, holds shape
+  - **Tulle**: Net-like, very sheer, stiff, used for layering
+  - **Net/Mesh**: Open weave, see-through, grid-like structure
+  - **Batiste**: Ultra-fine, soft, semi-sheer, smooth
+
+  **MEDIUM-WEIGHT fabrics:**
+  - **Crepe**: Slightly rough/crinkled texture, matte finish
+  - **Crepe de Chine**: Smooth crepe, slight luster, lighter than regular crepe
+  - **Nida**: Smooth, matte, medium-weight, no texture pattern — ONLY use when truly smooth/matte with zero texture
   - **Cotton**: Natural texture, breathable look, slightly stiff
-  - **Polyester**: Synthetic sheen, wrinkle-resistant appearance
-  - **ZOOM**: Thick, heavy, structured
+  - **Lawn**: Very fine, lightweight cotton, smooth, crisp
+  - **Muslin**: Soft, loosely woven cotton, slightly see-through
+  - **Cambric**: Fine, white, closely woven cotton, slight luster
+  - **Poplin**: Fine, tightly woven, slight ribbed texture
+  - **Chambray**: Colored warp + white weft, denim-like but lighter
+  - **Challis**: Soft, lightweight, fluid drape, often printed
   - **CEY**: Soft, flowing, slightly textured
-  - **ORGANJA**: Stiff, sheer, crisp
+  - **Viscose/Rayon**: Soft, smooth, silk-like drape, matte to slight sheen
+  - **Modal**: Very soft, smooth, silk-like feel, good drape
+  - **Tencel**: Smooth, cool touch, slight luster, eco-friendly
+
+  **HEAVY/STRUCTURED fabrics:**
+  - **ZOOM**: Thick, heavy, structured
+  - **Gabardine**: Tight twill weave, diagonal rib, firm
+  - **Twill**: Diagonal weave pattern visible
+  - **Denim**: Heavy twill, cotton-based, sturdy
+  - **Canvas/Duck**: Heavy, plain weave, very sturdy
+  - **Drill**: Heavy twill, similar to denim but softer
+  - **Scuba**: Thick, stretchy, smooth, neoprene-like
+
+  **LUSTROUS/SHINY fabrics:**
+  - **Silk**: High sheen, smooth, lustrous, natural fiber glow
+  - **Satin/Sateen**: Very high sheen on one side, smooth, reflective
+  - **Charmeuse**: Satin weave, very drapey, high luster front, matte back
+  - **Duchess Satin**: Heavy, stiff satin, luxurious sheen
+  - **Taffeta**: Crisp, smooth, slight sheen, rustling sound
+  - **Dupioni**: Irregular texture, nubby, lustrous, crisp
+  - **Habotai**: Lightweight silk, smooth, soft luster
+  - **Mikado**: Heavy, structured, subtle sheen
+  - **Faille**: Slight ribbed texture, subtle sheen, structured
+
+  **TEXTURED/PATTERNED fabrics:**
   - **Jacquard**: Woven patterns visible in the fabric
-  - **BELVET/Velvet**: Soft pile, rich texture, light-absorbing surface
+  - **Brocade**: Raised woven patterns, often metallic threads
+  - **Damask**: Reversible patterned fabric, tone-on-tone
+  - **Dobby**: Small geometric woven patterns
+  - **BELVET/Velvet/Velour**: Soft pile, rich texture, light-absorbing
+  - **Corduroy**: Ribbed pile texture, parallel ridges
   - **Linen/LILEN**: Natural, slightly wrinkled, breathable texture
+  - **Flannel**: Soft, brushed surface, warm
+  - **Fleece**: Thick, soft, fuzzy, synthetic warmth
+
+  **KNIT/STRETCH fabrics:**
+  - **Jersey**: Stretchy, knit texture, drapes closely to body
+  - **Ponte**: Double-knit, structured stretch, smooth surface
+  - **Interlock**: Double-knit, smooth both sides, medium weight
+  - **Rib Knit**: Vertical ribbed pattern, stretchy
+  - **French Terry**: Looped back, smooth front, comfortable
+  - **Pique**: Textured knit with small diamond/honeycomb pattern
+  - **Lycra/Spandex**: Highly elastic, body-hugging
+  - **Waffle Knit**: Grid-like textured surface
+
+  **SPECIALTY fabrics:**
+  - **Polyester**: Synthetic sheen, wrinkle-resistant appearance
+  - **Nylon**: Smooth, strong, slightly lustrous synthetic
+  - **Acrylic**: Soft synthetic, wool-like warmth
+  - **Oxford**: Basketweave texture, slightly rough
+  - **KASMIRI**: Soft, luxurious, warm, fine texture
+  - **POKA**: Dotted pattern or texture
+  - **AROWA**: Trade-specific smooth fabric
+  - **TICTOC**: Textured trade fabric
+  - **BABLA**: Lightweight trade fabric
+  - **FAKRU PRINT**: Printed trade fabric
+  - **KORIYAN SIMAR**: Korean-origin smooth fabric
+  - **JORI SHIPON**: Shimmer/shine chiffon variant
+
 - Look at shine, texture, weight, drape, and transparency to determine the ACTUAL fabric
 - Each fabric has distinct visual characteristics — USE THEM
+- NEVER guess — if unsure, state "medium" confidence
 
 When given an image, return a JSON object:
 
