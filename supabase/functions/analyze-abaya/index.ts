@@ -9,7 +9,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, mimeType } = await req.json();
+    const imageMime = mimeType || "image/jpeg";
 
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: "No image provided" }), {
@@ -214,7 +215,7 @@ CRITICAL RULES:
             role: "user",
             content: [
               { type: "text", text: "Analyze this burqa/abaya image and return ONLY the JSON object with no extra text." },
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } },
+              { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
             ],
           },
         ],

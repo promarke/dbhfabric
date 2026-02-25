@@ -3,7 +3,7 @@ import { Upload, X, Image as ImageIcon, Plus, Loader2 } from "lucide-react";
 import heic2any from "heic2any";
 
 interface ImageUploaderProps {
-  onImageSelect: (base64: string, preview: string) => void;
+  onImageSelect: (base64: string, preview: string, mimeType: string) => void;
   isAnalyzing: boolean;
   previews: { base64: string; preview: string }[];
   onClear: (index: number) => void;
@@ -50,7 +50,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         const result = await readFileAsDataURL(fileToRead);
         const base64 = result.split(",")[1];
-        onImageSelect(base64, result);
+        const mimeType = result.split(";")[0].split(":")[1] || "image/jpeg";
+        onImageSelect(base64, result, mimeType);
       } catch (err) {
         console.error("File processing error:", err);
         setIsConverting(false);
