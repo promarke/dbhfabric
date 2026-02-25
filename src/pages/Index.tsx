@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 interface ImageItem {
   base64: string;
   preview: string;
+  mimeType: string;
 }
 
 interface FeatureItem {
@@ -36,8 +37,8 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<FeatureItem | null>(null);
 
-  const handleImageSelect = useCallback((base64: string, preview: string) => {
-    setImages((prev) => [...prev, { base64, preview }]);
+  const handleImageSelect = useCallback((base64: string, preview: string, mimeType: string) => {
+    setImages((prev) => [...prev, { base64, preview, mimeType }]);
     setAnalysisResults([]);
     setError(null);
   }, []);
@@ -88,7 +89,7 @@ const Index = () => {
 
       for (const img of images) {
         const { data, error: fnError } = await supabase.functions.invoke("analyze-abaya", {
-          body: { imageBase64: img.base64 },
+          body: { imageBase64: img.base64, mimeType: img.mimeType },
         });
 
         if (fnError) throw fnError;
