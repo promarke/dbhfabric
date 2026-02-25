@@ -42,7 +42,15 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const CATEGORIES = ["ABAYA", "ABAYA 2P", "FARASHA", "FARASHA 2P", "BLAZER", "BORKA", "KOTI", "INNER", "HIJAB", "URNA", "NIQAAB", "KHIMAR", "JILBAB", "KAFTAN", "COAT", "PRAYER SET", "SAREE", "KURTI", "GOWN", "MAXI"];
+    const CATEGORIES = [
+      "ABAYA", "ABAYA 2P", "FARASHA", "FARASHA 2P", "BLAZER", "BORKA", "KOTI", "INNER",
+      "HIJAB", "URNA", "NIQAAB", "KHIMAR", "JILBAB", "KAFTAN", "COAT", "PRAYER SET",
+      "SAREE", "KURTI", "GOWN", "MAXI",
+      "PONCHO", "CAPE", "TUNIC", "PALAZZO", "SHRUG", "CARDIGAN", "VEST", "JUMPSUIT",
+      "SKIRT", "TROUSER", "SHARARA", "GHARARA", "LEHENGA", "SALWAR KAMEEZ", "CHURIDAR",
+      "DUPATTA", "STOLE", "SHAWL", "WRAP", "KIMONO", "PEPLUM", "SHIRT", "BLOUSE",
+      "HOODIE", "PULLOVER", "KAFTAN SET", "CO-ORD SET", "BURKINI", "MODEST SWIMWEAR"
+    ];
     const FABRICS = [
       "Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester",
       "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN",
@@ -58,7 +66,25 @@ serve(async (req) => {
       "Chambray", "Corduroy", "Crepe de Chine", "Duchess Satin",
       "Mesh", "Net", "Scuba", "Terry Cloth", "Waffle Knit"
     ];
-    const EMBELLISHMENTS = ["Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work", "HAND WORK", "ARI WORK", "CREP Work", "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone", "StoneFbody", "StoneHbody", "Stonehand", "StoneBack", "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack", "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront", "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal", "Foil Print", "Digital Print", "Block Print", "Screen Print", "Pintuck", "Pleating", "Cutwork", "Ribbon"];
+    const EMBELLISHMENTS = [
+      "Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work",
+      "HAND WORK", "ARI WORK", "CREP Work",
+      "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone",
+      "StoneFbody", "StoneHbody", "Stonehand", "StoneBack",
+      "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack",
+      "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront",
+      "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal",
+      "Foil Print", "Digital Print", "Block Print", "Screen Print",
+      "Pintuck", "Pleating", "Cutwork", "Ribbon",
+      "Mirror Work", "Kantha", "Phulkari", "Chikankari", "Lucknowi",
+      "Gota Patti", "Dabka", "Resham", "Mukaish", "Tilla",
+      "Bandhani", "Tie-Dye", "Batik", "Ikat", "Shibori",
+      "Crochet", "Tassel", "Fringe", "Pom Pom", "Ruffle",
+      "Smocking", "Quilting", "Patchwork", "Shadow Work", "Aari Work",
+      "Thread Work", "Bullion Knot", "French Knot", "Cross Stitch", "Kross Stitch",
+      "Laser Cut", "Burnout", "Devore", "Flocking", "Heat Transfer",
+      "Metallic Thread", "Gold Work", "Silver Work", "Kundan", "Meenakari"
+    ];
 
     const systemPrompt = `You are a world-class textile analyst. Your PRIMARY skill is distinguishing between different fabric types by analyzing texture, drape, sheen, weave pattern, and surface characteristics.
 
