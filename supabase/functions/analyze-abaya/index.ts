@@ -194,7 +194,37 @@ When given an image, return a JSON object:
 }
 
 CRITICAL RULES:
-- category_en MUST exactly match one from CATEGORIES list — IDENTIFY THE ACTUAL GARMENT TYPE by its silhouette, structure, length, and design. DO NOT default to "ABAYA". Examples: a long coat-like garment = COAT, a two-piece set = CO-ORD SET, a head covering = HIJAB/KHIMAR/NIQAAB, a loose flowing dress = KAFTAN/FARASHA, a fitted top = KURTI/BLOUSE, pants = TROUSER/PALAZZO, a prayer outfit = PRAYER SET, etc.
+- category_en MUST exactly match one from CATEGORIES list — IDENTIFY THE ACTUAL GARMENT TYPE. DO NOT default to "ABAYA".
+
+CATEGORY IDENTIFICATION GUIDE (use these visual cues):
+  * ABAYA: Fitted or semi-fitted, front-open or closed, structured shoulders, traditional modest robe with defined waistline or straight cut
+  * FARASHA: Butterfly/bat-wing sleeves, very loose/flowing, NO defined waist, tent-like silhouette, wide flared shape — if the garment has extremely wide/flowy sleeves and a loose A-line or tent shape, it is FARASHA not ABAYA
+  * FARASHA 2P: Same as FARASHA but comes as a two-piece set
+  * ABAYA 2P: Abaya style but comes as a two-piece set
+  * KAFTAN: Loose, ankle-length, ornate, often with V-neck or embellished neckline, no front opening
+  * BORKA: Full-body covering, often one-piece, very loose, minimal design
+  * JILBAB: Long outer garment, covers from head/shoulders to feet, often with attached headpiece
+  * COAT: Structured, front-button/zip, collar, coat-like construction
+  * BLAZER: Short structured jacket with lapels
+  * KOTI: Sleeveless vest/waistcoat worn over other garments
+  * HIJAB: Head covering only, square or rectangular fabric
+  * KHIMAR: Head covering that extends to waist or below
+  * NIQAAB: Face veil
+  * URNA: Long scarf/shawl
+  * KURTI: Short to knee-length fitted top
+  * GOWN: Floor-length formal dress, fitted bodice
+  * MAXI: Long casual dress
+  * SAREE: Draped fabric, 5-6 yards
+  * PRAYER SET: Matching set specifically for prayer
+  * CO-ORD SET: Matching top and bottom set
+  * PALAZZO: Wide-leg pants
+  * TROUSER: Regular pants/trousers
+  * JUMPSUIT: One-piece top+bottom connected
+  * SKIRT: Bottom garment, various lengths
+  * PONCHO: Pullover cloak without sleeves
+  * CAPE: Sleeveless cloak draped over shoulders
+  * KIMONO: Open-front, wide sleeves, Japanese-inspired
+  * INNER: Undergarment/slip worn beneath outer garments
 - fabric_name_en MUST exactly match one from FABRICS list — IDENTIFY THE ACTUAL FABRIC, do not default to Nida
 - embellishment_en MUST exactly match one from EMBELLISHMENTS list
 - product_name = category_en + " — " + fabric_name_en + " — " + embellishment_en
