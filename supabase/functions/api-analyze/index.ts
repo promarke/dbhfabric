@@ -366,11 +366,10 @@ serve(async (req) => {
     // ===== STEP 2: Full analysis =====
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
-      "google/gemini-2.5-flash",
+      "google/gemini-3-flash-preview",
       buildAnalysisPrompt(detectedCategory),
-      `Analyze this garment image. Category is confirmed: ${detectedCategory}. 
-IMPORTANT: Complete ALL 7 fabric elimination checks before naming the fabric.
-Do NOT default to Nida for black garments. Return ONLY the JSON.`,
+      `Analyze this garment image. Category is confirmed: ${detectedCategory}.
+Follow the fabric identification protocol fully, produce top-3 candidates, and return one canonical fabric only.`,
       imageDataUrl
     );
 
@@ -386,6 +385,41 @@ Do NOT default to Nida for black garments. Return ONLY the JSON.`,
       analysis = parseJSON(analysisResult.content!);
     } catch {
       throw new Error("Failed to parse analysis result");
+    }
+
+    const rawFabric = analysis.fabric_name_en ?? analysis.fabric_name;
+    let { fabric: normalizedFabric, wasCompound } = normalizeFabricName(rawFabric);
+
+    if (!normalizedFabric) {
+      const recovered = await recoverFabricFromImage(LOVABLE_API_KEY, imageDataUrl, detectedCategory, analysis);
+      const recoveredNormalized = normalizeFabricName(recovered.fabric_name_en);
+
+      if (recoveredNormalized.fabric) {
+        normalizedFabric = recoveredNormalized.fabric;
+        wasCompound = wasCompound || recoveredNormalized.wasCompound;
+      }
+
+      if (recovered.fabric_reasoning) {
+        analysis.fabric_reasoning = recovered.fabric_reasoning;
+      }
+
+      if (recovered.fabric_top_candidates_en.length) {
+        analysis.fabric_top_candidates_en = recovered.fabric_top_candidates_en;
+      }
+
+      analysis.fabric_confidence = recovered.fabric_confidence;
+    }
+
+    if (!normalizedFabric) {
+      throw new Error("Unable to determine a reliable single fabric from the image");
+    }
+
+    analysis.fabric_name = normalizedFabric;
+    analysis.fabric_name_en = normalizedFabric;
+    analysis.fabric_confidence = normalizeConfidence(analysis.fabric_confidence);
+
+    if (wasCompound && analysis.fabric_confidence === "high") {
+      analysis.fabric_confidence = "medium";
     }
 
     analysis.category = detectedCategory;
