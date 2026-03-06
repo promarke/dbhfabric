@@ -26,6 +26,8 @@ export type Database = {
           craftsmanship: string | null
           craftsmanship_en: string | null
           created_at: string
+          design_details: string | null
+          design_details_en: string | null
           embellishment: string | null
           embellishment_en: string | null
           fabric_name: string | null
@@ -46,6 +48,8 @@ export type Database = {
           craftsmanship?: string | null
           craftsmanship_en?: string | null
           created_at?: string
+          design_details?: string | null
+          design_details_en?: string | null
           embellishment?: string | null
           embellishment_en?: string | null
           fabric_name?: string | null
@@ -66,6 +70,8 @@ export type Database = {
           craftsmanship?: string | null
           craftsmanship_en?: string | null
           created_at?: string
+          design_details?: string | null
+          design_details_en?: string | null
           embellishment?: string | null
           embellishment_en?: string | null
           fabric_name?: string | null

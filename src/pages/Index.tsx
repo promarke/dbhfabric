@@ -71,6 +71,8 @@ const Index = () => {
         category_en: result.category_en,
         additional_details: result.additional_details,
         additional_details_en: result.additional_details_en,
+        design_details: result.design_details,
+        design_details_en: result.design_details_en,
         confidence: result.confidence,
       });
     } catch (e) {
