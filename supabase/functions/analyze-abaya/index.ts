@@ -364,12 +364,10 @@ serve(async (req) => {
     console.log("Step 2: Full analysis with category:", detectedCategory);
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
-      "google/gemini-2.5-flash",
+      "google/gemini-3-flash-preview",
       buildAnalysisPrompt(detectedCategory),
-      `Analyze this garment image. Category is confirmed: ${detectedCategory}. 
-IMPORTANT: Complete ALL 7 fabric elimination checks before naming the fabric. 
-Do NOT default to Nida for black garments. Report each check result in fabric_reasoning.
-Return ONLY the JSON object.`,
+      `Analyze this garment image. Category is confirmed: ${detectedCategory}.
+Follow the fabric identification protocol fully, produce top-3 candidates, and return one canonical fabric only.`,
       imageUrl
     );
 
@@ -386,6 +384,43 @@ Return ONLY the JSON object.`,
     } catch {
       console.error("Failed to parse analysis response:", analysisResult.content);
       throw new Error("এনালাইসিস পার্স করতে ব্যর্থ। আবার চেষ্টা করুন।");
+    }
+
+    const rawFabric = analysis.fabric_name_en ?? analysis.fabric_name;
+    let { fabric: normalizedFabric, wasCompound } = normalizeFabricName(rawFabric);
+
+    if (!normalizedFabric) {
+      const recovered = await recoverFabricFromImage(LOVABLE_API_KEY, imageUrl, detectedCategory, analysis);
+      const recoveredNormalized = normalizeFabricName(recovered.fabric_name_en);
+
+      if (recoveredNormalized.fabric) {
+        normalizedFabric = recoveredNormalized.fabric;
+        wasCompound = wasCompound || recoveredNormalized.wasCompound;
+      }
+
+      if (recovered.fabric_reasoning) {
+        analysis.fabric_reasoning = recovered.fabric_reasoning;
+      }
+
+      if (recovered.fabric_top_candidates_en.length) {
+        analysis.fabric_top_candidates_en = recovered.fabric_top_candidates_en;
+      }
+
+      analysis.fabric_confidence = recovered.fabric_confidence;
+    }
+
+    if (!normalizedFabric) {
+      throw new Error("ফেব্রিক নির্ভরযোগ্যভাবে শনাক্ত করা যায়নি। আরো পরিষ্কার ছবি দিন।");
+    }
+
+    analysis.fabric_name_en = normalizedFabric;
+    if (typeof analysis.fabric_name !== "string" || !analysis.fabric_name.trim()) {
+      analysis.fabric_name = normalizedFabric;
+    }
+
+    analysis.fabric_confidence = normalizeConfidence(analysis.fabric_confidence);
+    if (wasCompound && analysis.fabric_confidence === "high") {
+      analysis.fabric_confidence = "medium";
     }
 
     // Ensure category from step 1
