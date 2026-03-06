@@ -51,7 +51,6 @@ const EMBELLISHMENTS = [
   "Metallic Thread", "Gold Work", "Silver Work", "Kundan", "Meenakari"
 ];
 
-// Step 1: Category-only prompt — focused and strict
 function buildCategoryPrompt(): string {
   return `You are a garment classification expert. Your ONLY job is to identify the EXACT category of the garment in the image.
 
@@ -81,19 +80,12 @@ CRITICAL: You MUST follow this decision tree IN ORDER. Stop at the FIRST match:
 20. ONLY if NONE of steps 1-19 match AND it is a structured, front-open OR A-line modest robe → ABAYA
 
 🚫 ABAYA IS NOT THE DEFAULT. Most garments are NOT abayas.
-🚫 If the garment has butterfly sleeves → FARASHA, not ABAYA
-🚫 If the garment is extremely loose/tent-shaped → BORKA or FARASHA, not ABAYA
-🚫 If it has ornate V-neck without front opening → KAFTAN, not ABAYA
-🚫 If it's a formal dress → GOWN, not ABAYA
-🚫 If it's a casual long dress → MAXI, not ABAYA
-🚫 If it has attached headpiece → JILBAB, not ABAYA
 
 Think step by step. For each step 1-20, write YES or NO. Then give your final answer.
 
 Return JSON: {"category_en": "EXACT_CATEGORY", "reasoning": "brief explanation of why this category and not others"}`;
 }
 
-// Step 2: Full analysis prompt (category already determined)
 function buildAnalysisPrompt(category: string): string {
   return `You are a textile analyst. The garment category has been determined as: **${category}**
 
@@ -103,31 +95,54 @@ MAP to these EXACT values:
 **FABRICS:** ${FABRICS.join(", ")}
 **EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
 
-🚫 CRITICAL: "Nida" is NOT a default for black fabrics. Black color does NOT mean Nida.
-🚫 DO NOT assume Nida just because the garment is black/dark colored.
+════════════════════════════════════════
+⚠️ MANDATORY FABRIC ELIMINATION PROCESS ⚠️
+════════════════════════════════════════
 
-FABRIC IDENTIFICATION — analyze texture, sheen, drape, weight CAREFULLY:
-- Sheer/semi-transparent/flowing → Chiffon, Georgette, Voile, Organza
-- Crinkled/pebbly/textured surface → Crepe, Crepe de Chine
-- High sheen/lustrous/glossy → Silk, Satin, Charmeuse, Sateen, Duchess Satin
-- Stretchy/body-hugging/knit → Jersey, Ponte, Lycra, Scuba
-- Thick/structured/stiff → ZOOM, Gabardine, Twill, Poplin
-- Soft/drapey/fluid (NOT sheer) → Rayon, Viscose, Modal, Challis
-- Natural/breathable texture → Cotton, Linen, Lawn, Cambric, Muslin
-- Woven patterns visible → Jacquard, Brocade, Damask, Dobby
-- Soft pile/velvet touch → BELVET/Velvet, Velour, Corduroy
-- Lightweight/crisp → Poplin, Oxford, Chambray
-- Medium weight, smooth, matte, NO texture, NO sheen, NO crinkle → Nida (VERY specific — most fabrics are NOT Nida)
-- Net/mesh-like → Net, Mesh, Tulle
+You MUST complete ALL 7 checks below and report findings for EACH before naming a fabric.
+DO NOT skip any check. DO NOT jump to a conclusion.
 
-DECISION PROCESS for fabric:
-1. First check SHEEN — if any shine/luster → Satin, Silk, Charmeuse (NOT Nida)
-2. Then check TEXTURE — if crinkled/pebbly → Crepe (NOT Nida)
-3. Then check TRANSPARENCY — if see-through → Chiffon, Georgette (NOT Nida)
-4. Then check STRETCH — if stretchy → Jersey, Ponte (NOT Nida)
-5. Then check WEIGHT — if thick/stiff → ZOOM, Gabardine (NOT Nida)
-6. Then check DRAPE — if very fluid → Rayon, Viscose (NOT Nida)
-7. ONLY if ALL above are NO → then consider Nida
+CHECK 1 — SHEEN: Does the fabric show ANY shine, luster, or glossy reflection?
+  → YES: It is Satin, Silk, Charmeuse, Sateen, or Duchess Satin. STOP.
+  → NO: Continue.
+
+CHECK 2 — TEXTURE: Does the surface show crinkle, pebble, grain, or roughness?
+  → YES: It is Crepe, Crepe de Chine, or textured fabric. STOP.
+  → NO: Continue.
+
+CHECK 3 — TRANSPARENCY: Can you see through the fabric at all? Is it sheer or semi-transparent?
+  → YES: It is Chiffon, Georgette, Voile, or Organza. STOP.
+  → NO: Continue.
+
+CHECK 4 — STRETCH: Does the fabric appear to stretch, cling, or hug the body?
+  → YES: It is Jersey, Ponte, Lycra, or Scuba. STOP.
+  → NO: Continue.
+
+CHECK 5 — WEIGHT/STIFFNESS: Does the fabric appear thick, heavy, or hold its shape rigidly?
+  → YES: It is ZOOM, Gabardine, Twill, or Poplin. STOP.
+  → NO: Continue.
+
+CHECK 6 — DRAPE/FLOW: Does the fabric flow very softly and fluidly (but NOT sheer)?
+  → YES: It is Rayon, Viscose, Modal, or Challis. STOP.
+  → NO: Continue.
+
+CHECK 7 — NATURAL TEXTURE: Does it show natural fiber characteristics (breathable, cotton-like)?
+  → YES: It is Cotton, Linen, Lawn, Cambric, or Muslin. STOP.
+  → NO: Continue to final assessment.
+
+FINAL: ONLY if ALL 7 checks are genuinely NO → then it MAY be Nida.
+But even then, confirm: Is it truly medium-weight, perfectly smooth, completely matte, with zero texture?
+
+🚫 "Nida" is NEVER the answer just because the garment is BLACK.
+🚫 "smooth" alone is NOT enough for Nida — many fabrics are smooth (Satin, Crepe, Rayon, Polyester).
+🚫 If you cannot clearly identify specific Nida characteristics, choose Polyester or Crepe instead.
+
+════════════════════════════════════════
+CONFIDENCE RULES:
+- "high" = You can clearly see distinctive visual cues (e.g., visible crinkle for Crepe, visible shine for Satin)
+- "medium" = Fabric shows some characteristics but image quality makes it uncertain
+- "low" = Cannot clearly determine from the image, making best guess
+════════════════════════════════════════
 
 Return ONLY this JSON:
 {
@@ -149,7 +164,7 @@ Return ONLY this JSON:
   "design_details_en": "Describe motifs, patterns, placement in detail",
   "confidence": "high/medium/low",
   "fabric_confidence": "high/medium/low",
-  "fabric_reasoning": "Explain WHY this fabric was identified: what visual cues (sheen, texture, drape, weight, transparency) led to this conclusion",
+  "fabric_reasoning": "Report each CHECK 1-7 result, then explain final fabric choice",
   "product_name": "${category} — [fabric] — [embellishment]"
 }`;
 }
@@ -163,6 +178,7 @@ async function callAI(apiKey: string, model: string, systemPrompt: string, userT
     },
     body: JSON.stringify({
       model,
+      temperature: 0.1,
       messages: [
         { role: "system", content: systemPrompt },
         {
@@ -177,12 +193,8 @@ async function callAI(apiKey: string, model: string, systemPrompt: string, userT
   });
 
   if (!response.ok) {
-    if (response.status === 429) {
-      return { error: "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।", status: 429 };
-    }
-    if (response.status === 402) {
-      return { error: "ক্রেডিট শেষ। অনুগ্রহ করে ক্রেডিট যোগ করুন।", status: 402 };
-    }
+    if (response.status === 429) return { error: "অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন।", status: 429 };
+    if (response.status === 402) return { error: "ক্রেডিট শেষ। অনুগ্রহ করে ক্রেডিট যোগ করুন।", status: 402 };
     const errorText = await response.text();
     console.error("AI gateway error:", response.status, errorText);
     throw new Error(`AI gateway error: ${response.status}`);
@@ -217,13 +229,13 @@ serve(async (req) => {
 
     const imageUrl = `data:${imageMime};base64,${imageBase64}`;
 
-    // ===== STEP 1: Determine category with dedicated prompt =====
+    // ===== STEP 1: Determine category =====
     console.log("Step 1: Determining category...");
     const categoryResult = await callAI(
       LOVABLE_API_KEY,
       "google/gemini-2.5-pro",
       buildCategoryPrompt(),
-      "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. For each step, check if it matches. Stop at the FIRST match. Do NOT default to ABAYA. Most garments have a more specific category. Return the JSON.",
+      "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. Stop at the FIRST match. Do NOT default to ABAYA. Return the JSON.",
       imageUrl
     );
 
@@ -239,22 +251,31 @@ serve(async (req) => {
       categoryData = parseJSON(categoryResult.content!);
     } catch {
       console.error("Failed to parse category response:", categoryResult.content);
-      throw new Error("Failed to parse category result");
+      throw new Error("ক্যাটাগরি শনাক্ত করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
     }
 
+    // Validate category — do NOT silently default to ABAYA
     const detectedCategory = CATEGORIES.includes(categoryData.category_en)
       ? categoryData.category_en
-      : "ABAYA";
+      : null;
+
+    if (!detectedCategory) {
+      console.error("Invalid category returned:", categoryData.category_en);
+      throw new Error(`অচেনা ক্যাটাগরি: ${categoryData.category_en}। আবার চেষ্টা করুন।`);
+    }
 
     console.log("Detected category:", detectedCategory, "Reasoning:", categoryData.reasoning);
 
-    // ===== STEP 2: Full analysis with confirmed category =====
+    // ===== STEP 2: Full analysis =====
     console.log("Step 2: Full analysis with category:", detectedCategory);
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
       "google/gemini-2.5-flash",
       buildAnalysisPrompt(detectedCategory),
-      "Analyze this garment image for fabric type, embellishment, color, and design details. The category is already confirmed. Return ONLY the JSON object.",
+      `Analyze this garment image. Category is confirmed: ${detectedCategory}. 
+IMPORTANT: Complete ALL 7 fabric elimination checks before naming the fabric. 
+Do NOT default to Nida for black garments. Report each check result in fabric_reasoning.
+Return ONLY the JSON object.`,
       imageUrl
     );
 
@@ -270,15 +291,15 @@ serve(async (req) => {
       analysis = parseJSON(analysisResult.content!);
     } catch {
       console.error("Failed to parse analysis response:", analysisResult.content);
-      throw new Error("Failed to parse analysis result");
+      throw new Error("এনালাইসিস পার্স করতে ব্যর্থ। আবার চেষ্টা করুন।");
     }
 
-    // Ensure category is the one from step 1
+    // Ensure category from step 1
     analysis.category_en = detectedCategory;
-    // Add reasoning from step 1
     analysis.category_reasoning = categoryData.reasoning || "";
-    // Rebuild product_name
     analysis.product_name = `${detectedCategory} — ${analysis.fabric_name_en || "Unknown"} — ${analysis.embellishment_en || "Plain"}`;
+
+    console.log("Final result:", analysis.product_name, "| Fabric confidence:", analysis.fabric_confidence);
 
     return new Response(JSON.stringify({ analysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
