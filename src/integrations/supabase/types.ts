@@ -20,6 +20,7 @@ export type Database = {
           additional_details_en: string | null
           category: string | null
           category_en: string | null
+          category_reasoning: string | null
           color: string | null
           color_en: string | null
           confidence: string | null
@@ -30,8 +31,10 @@ export type Database = {
           design_details_en: string | null
           embellishment: string | null
           embellishment_en: string | null
+          fabric_confidence: string | null
           fabric_name: string | null
           fabric_name_en: string | null
+          fabric_reasoning: string | null
           fabric_type: string | null
           fabric_type_en: string | null
           id: string
@@ -42,6 +45,7 @@ export type Database = {
           additional_details_en?: string | null
           category?: string | null
           category_en?: string | null
+          category_reasoning?: string | null
           color?: string | null
           color_en?: string | null
           confidence?: string | null
@@ -52,8 +56,10 @@ export type Database = {
           design_details_en?: string | null
           embellishment?: string | null
           embellishment_en?: string | null
+          fabric_confidence?: string | null
           fabric_name?: string | null
           fabric_name_en?: string | null
+          fabric_reasoning?: string | null
           fabric_type?: string | null
           fabric_type_en?: string | null
           id?: string
@@ -64,6 +70,7 @@ export type Database = {
           additional_details_en?: string | null
           category?: string | null
           category_en?: string | null
+          category_reasoning?: string | null
           color?: string | null
           color_en?: string | null
           confidence?: string | null
@@ -74,8 +81,10 @@ export type Database = {
           design_details_en?: string | null
           embellishment?: string | null
           embellishment_en?: string | null
+          fabric_confidence?: string | null
           fabric_name?: string | null
           fabric_name_en?: string | null
+          fabric_reasoning?: string | null
           fabric_type?: string | null
           fabric_type_en?: string | null
           id?: string
