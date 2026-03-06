@@ -148,6 +148,8 @@ Return ONLY this JSON:
   "design_details": "বাংলায়",
   "design_details_en": "Describe motifs, patterns, placement in detail",
   "confidence": "high/medium/low",
+  "fabric_confidence": "high/medium/low",
+  "fabric_reasoning": "Explain WHY this fabric was identified: what visual cues (sheen, texture, drape, weight, transparency) led to this conclusion",
   "product_name": "${category} — [fabric] — [embellishment]"
 }`;
 }

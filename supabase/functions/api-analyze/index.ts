@@ -122,6 +122,8 @@ Return ONLY this JSON:
   "additional_details": "Weight, opacity, stretch, care, occasion",
   "design_details": "Describe motifs, patterns, placement in detail",
   "confidence": "high/medium/low",
+  "fabric_confidence": "high/medium/low",
+  "fabric_reasoning": "Explain WHY this fabric was identified: what visual cues led to this conclusion",
   "product_name": "${category} — [fabric] — [embellishment]"
 }`;
 }
