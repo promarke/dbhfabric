@@ -228,6 +228,82 @@ function parseJSON(content: string) {
   throw new Error("No JSON found in response");
 }
 
+function normalizeConfidence(value: unknown): "high" | "medium" | "low" {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (normalized === "high" || normalized === "medium" || normalized === "low") return normalized;
+  return "low";
+}
+
+function normalizeFabricName(value: unknown): { fabric: string | null; wasCompound: boolean } {
+  if (typeof value !== "string") return { fabric: null, wasCompound: false };
+
+  const cleaned = value.trim().replace(/\s+/g, " ");
+  if (!cleaned) return { fabric: null, wasCompound: false };
+
+  const direct = FABRIC_MAP.get(cleaned.toLowerCase()) ?? FABRIC_ALIASES[cleaned.toLowerCase()];
+  if (direct) return { fabric: direct, wasCompound: false };
+
+  const parts = cleaned
+    .split(/(?:,|\/|\+|\sand\s|\s&\s|\swith\s|\|)/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const matched = Array.from(
+    new Set(
+      parts
+        .map((part) => FABRIC_MAP.get(part.toLowerCase()) ?? FABRIC_ALIASES[part.toLowerCase()])
+        .filter((fabric): fabric is string => Boolean(fabric))
+    )
+  );
+
+  if (matched.length === 1) return { fabric: matched[0], wasCompound: parts.length > 1 };
+
+  return { fabric: null, wasCompound: parts.length > 1 || /[,+/&|]/.test(cleaned) };
+}
+
+async function recoverFabricFromImage(
+  apiKey: string,
+  imageUrl: string,
+  category: string,
+  analysis: Record<string, unknown>
+) {
+  const recoveryResult = await callAI(
+    apiKey,
+    "google/gemini-3-flash-preview",
+    buildFabricRecoveryPrompt(category),
+    `Initial analysis (may contain wrong/invalid fabric): ${JSON.stringify(analysis)}\nReturn corrected canonical fabric JSON only.`,
+    imageUrl
+  );
+
+  if (recoveryResult.error) {
+    return {
+      fabric_name_en: null,
+      fabric_confidence: "low" as const,
+      fabric_reasoning: analysis.fabric_reasoning,
+      fabric_top_candidates_en: [],
+    };
+  }
+
+  try {
+    const parsed = parseJSON(recoveryResult.content || "");
+    return {
+      fabric_name_en: parsed.fabric_name_en,
+      fabric_confidence: normalizeConfidence(parsed.fabric_confidence),
+      fabric_reasoning: parsed.fabric_reasoning,
+      fabric_top_candidates_en: Array.isArray(parsed.fabric_top_candidates_en)
+        ? parsed.fabric_top_candidates_en.slice(0, 3)
+        : [],
+    };
+  } catch {
+    return {
+      fabric_name_en: null,
+      fabric_confidence: "low" as const,
+      fabric_reasoning: analysis.fabric_reasoning,
+      fabric_top_candidates_en: [],
+    };
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
