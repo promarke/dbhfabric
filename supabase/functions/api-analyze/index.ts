@@ -95,6 +95,22 @@ MAP to these EXACT values:
 **FABRICS:** ${FABRICS.join(", ")}
 **EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
 
+🚫 CRITICAL: "Nida" is NOT a default for black fabrics. Black color does NOT mean Nida.
+
+FABRIC IDENTIFICATION — analyze texture, sheen, drape, weight CAREFULLY:
+- Sheer/semi-transparent/flowing → Chiffon, Georgette, Voile, Organza
+- Crinkled/pebbly/textured surface → Crepe, Crepe de Chine
+- High sheen/lustrous/glossy → Silk, Satin, Charmeuse, Sateen
+- Stretchy/body-hugging/knit → Jersey, Ponte, Lycra, Scuba
+- Thick/structured/stiff → ZOOM, Gabardine, Twill, Poplin
+- Soft/drapey/fluid (NOT sheer) → Rayon, Viscose, Modal, Challis
+- Natural texture → Cotton, Linen, Lawn, Cambric
+- Woven patterns → Jacquard, Brocade, Damask, Dobby
+- Soft pile → BELVET/Velvet, Velour
+- Medium weight, smooth, matte, NO texture, NO sheen, NO crinkle → Nida (VERY specific)
+
+DECISION PROCESS: Check sheen→texture→transparency→stretch→weight→drape FIRST. ONLY if ALL are negative → consider Nida.
+
 Return ONLY this JSON:
 {
   "fabric_name": "From FABRICS list",
