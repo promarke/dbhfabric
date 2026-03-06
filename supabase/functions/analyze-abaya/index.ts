@@ -258,6 +258,8 @@ serve(async (req) => {
 
     // Ensure category is the one from step 1
     analysis.category_en = detectedCategory;
+    // Add reasoning from step 1
+    analysis.category_reasoning = categoryData.reasoning || "";
     // Rebuild product_name
     analysis.product_name = `${detectedCategory} — ${analysis.fabric_name_en || "Unknown"} — ${analysis.embellishment_en || "Plain"}`;
 
