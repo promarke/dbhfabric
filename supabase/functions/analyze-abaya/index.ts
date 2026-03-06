@@ -103,16 +103,31 @@ MAP to these EXACT values:
 **FABRICS:** ${FABRICS.join(", ")}
 **EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
 
-FABRIC IDENTIFICATION — analyze texture, sheen, drape, weight:
-- Sheer/flowing → Chiffon, Georgette, Voile, Organza
-- Smooth matte, zero texture → Nida (ONLY if truly smooth/matte)
-- Slightly rough/crinkled → Crepe
-- High sheen/lustrous → Silk, Satin, Charmeuse
-- Natural texture → Cotton, Linen
-- Stretchy/knit → Jersey, Ponte, Lycra
-- Thick/heavy → ZOOM, Gabardine, Scuba
-- Woven patterns → Jacquard, Brocade, Damask
-- Soft pile → BELVET/Velvet
+🚫 CRITICAL: "Nida" is NOT a default for black fabrics. Black color does NOT mean Nida.
+🚫 DO NOT assume Nida just because the garment is black/dark colored.
+
+FABRIC IDENTIFICATION — analyze texture, sheen, drape, weight CAREFULLY:
+- Sheer/semi-transparent/flowing → Chiffon, Georgette, Voile, Organza
+- Crinkled/pebbly/textured surface → Crepe, Crepe de Chine
+- High sheen/lustrous/glossy → Silk, Satin, Charmeuse, Sateen, Duchess Satin
+- Stretchy/body-hugging/knit → Jersey, Ponte, Lycra, Scuba
+- Thick/structured/stiff → ZOOM, Gabardine, Twill, Poplin
+- Soft/drapey/fluid (NOT sheer) → Rayon, Viscose, Modal, Challis
+- Natural/breathable texture → Cotton, Linen, Lawn, Cambric, Muslin
+- Woven patterns visible → Jacquard, Brocade, Damask, Dobby
+- Soft pile/velvet touch → BELVET/Velvet, Velour, Corduroy
+- Lightweight/crisp → Poplin, Oxford, Chambray
+- Medium weight, smooth, matte, NO texture, NO sheen, NO crinkle → Nida (VERY specific — most fabrics are NOT Nida)
+- Net/mesh-like → Net, Mesh, Tulle
+
+DECISION PROCESS for fabric:
+1. First check SHEEN — if any shine/luster → Satin, Silk, Charmeuse (NOT Nida)
+2. Then check TEXTURE — if crinkled/pebbly → Crepe (NOT Nida)
+3. Then check TRANSPARENCY — if see-through → Chiffon, Georgette (NOT Nida)
+4. Then check STRETCH — if stretchy → Jersey, Ponte (NOT Nida)
+5. Then check WEIGHT — if thick/stiff → ZOOM, Gabardine (NOT Nida)
+6. Then check DRAPE — if very fluid → Rayon, Viscose (NOT Nida)
+7. ONLY if ALL above are NO → then consider Nida
 
 Return ONLY this JSON:
 {
