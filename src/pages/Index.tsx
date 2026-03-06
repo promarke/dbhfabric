@@ -74,6 +74,9 @@ const Index = () => {
         design_details: result.design_details,
         design_details_en: result.design_details_en,
         confidence: result.confidence,
+        fabric_confidence: result.fabric_confidence,
+        fabric_reasoning: result.fabric_reasoning,
+        category_reasoning: result.category_reasoning,
       });
     } catch (e) {
       console.error("Failed to save history:", e);

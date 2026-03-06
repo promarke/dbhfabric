@@ -1,0 +1,1 @@
+ALTER TABLE public.analysis_history ADD COLUMN fabric_confidence text, ADD COLUMN fabric_reasoning text, ADD COLUMN category_reasoning text;
