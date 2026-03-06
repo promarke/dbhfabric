@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { History, Trash2, ChevronDown, ChevronUp, Copy, Check, Search, X } from "lucide-react";
+import { History, Trash2, ChevronDown, ChevronUp, Copy, Check, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 interface HistoryItem {
@@ -76,20 +76,28 @@ const HistoryPanel: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 10;
 
-  const fetchHistory = async () => {
+  const fetchHistory = async (page: number = 1) => {
     setLoading(true);
-    const { data } = await supabase
+    const offset = (page - 1) * itemsPerPage;
+    
+    const { data, count } = await supabase
       .from("analysis_history")
-      .select("id, fabric_name, fabric_name_en, fabric_type, fabric_type_en, embellishment, embellishment_en, color, color_en, craftsmanship, craftsmanship_en, category, category_en, confidence, created_at, design_details, design_details_en")
+      .select("id, fabric_name, fabric_name_en, fabric_type, fabric_type_en, embellishment, embellishment_en, color, color_en, craftsmanship, craftsmanship_en, category, category_en, confidence, created_at, design_details, design_details_en", { count: "exact" })
       .order("created_at", { ascending: false })
-      .limit(50);
+      .range(offset, offset + itemsPerPage - 1);
+    
     setItems((data as HistoryItem[]) || []);
+    setTotalCount(count || 0);
+    setCurrentPage(page);
     setLoading(false);
   };
 
   useEffect(() => {
-    if (isOpen) fetchHistory();
+    if (isOpen) fetchHistory(1);
   }, [isOpen]);
 
   const handleDelete = async (id: string) => {
@@ -213,8 +221,33 @@ const HistoryPanel: React.FC = () => {
                   <HistoryRow key={item.id} item={item} onDelete={handleDelete} />
                 ))}
               </div>
-            )}
+           )}
           </div>
+
+          {/* Pagination Controls */}
+          {filteredItems.length > 0 && (
+            <div className="px-3 py-3 border-t border-border flex items-center justify-between bg-muted/10">
+              <span className="text-xs text-muted-foreground">
+                {items.length > 0 ? `পৃষ্ঠা ${currentPage} / ${Math.ceil(totalCount / itemsPerPage)}` : ""}
+              </span>
+              <div className="flex gap-1">
+                <button
+                  onClick={() => fetchHistory(currentPage - 1)}
+                  disabled={currentPage === 1 || loading}
+                  className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => fetchHistory(currentPage + 1)}
+                  disabled={currentPage >= Math.ceil(totalCount / itemsPerPage) || loading}
+                  className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
