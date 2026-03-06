@@ -5,6 +5,151 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-api-key",
 };
 
+const CATEGORIES = [
+  "ABAYA", "ABAYA 2P", "FARASHA", "FARASHA 2P", "BLAZER", "BORKA", "KOTI", "INNER",
+  "HIJAB", "URNA", "NIQAAB", "KHIMAR", "JILBAB", "KAFTAN", "COAT", "PRAYER SET",
+  "SAREE", "KURTI", "GOWN", "MAXI",
+  "PONCHO", "CAPE", "TUNIC", "PALAZZO", "SHRUG", "CARDIGAN", "VEST", "JUMPSUIT",
+  "SKIRT", "TROUSER", "SHARARA", "GHARARA", "LEHENGA", "SALWAR KAMEEZ", "CHURIDAR",
+  "DUPATTA", "STOLE", "SHAWL", "WRAP", "KIMONO", "PEPLUM", "SHIRT", "BLOUSE",
+  "HOODIE", "PULLOVER", "KAFTAN SET", "CO-ORD SET", "BURKINI", "MODEST SWIMWEAR"
+];
+
+const FABRICS = [
+  "Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester",
+  "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN",
+  "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON",
+  "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex",
+  "Twill", "Jacquard", "Dobby", "Poplin", "Oxford",
+  "French Terry", "Ponte", "Interlock", "Rib Knit", "Pique",
+  "Bamboo", "Wool", "Acrylic", "Nylon", "Hemp", "Jute", "Ramie",
+  "Muslin", "Lawn", "Voile", "Batiste", "Cambric", "Challis", "Charmeuse",
+  "Damask", "Dupioni", "Faille", "Flannel", "Fleece", "Gabardine", "Habotai",
+  "Mikado", "Organza", "Taffeta", "Tulle", "Velour",
+  "Brocade", "Canvas", "Denim", "Drill", "Duck", "Sateen",
+  "Chambray", "Corduroy", "Crepe de Chine", "Duchess Satin",
+  "Mesh", "Net", "Scuba", "Terry Cloth", "Waffle Knit"
+];
+
+const EMBELLISHMENTS = [
+  "Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work",
+  "HAND WORK", "ARI WORK", "CREP Work",
+  "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone",
+  "StoneFbody", "StoneHbody", "Stonehand", "StoneBack",
+  "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack",
+  "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront",
+  "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal",
+  "Foil Print", "Digital Print", "Block Print", "Screen Print",
+  "Pintuck", "Pleating", "Cutwork", "Ribbon",
+  "Mirror Work", "Kantha", "Phulkari", "Chikankari", "Lucknowi",
+  "Gota Patti", "Dabka", "Resham", "Mukaish", "Tilla",
+  "Bandhani", "Tie-Dye", "Batik", "Ikat", "Shibori",
+  "Crochet", "Tassel", "Fringe", "Pom Pom", "Ruffle",
+  "Smocking", "Quilting", "Patchwork", "Shadow Work", "Aari Work",
+  "Thread Work", "Bullion Knot", "French Knot", "Cross Stitch", "Kross Stitch",
+  "Laser Cut", "Burnout", "Devore", "Flocking", "Heat Transfer",
+  "Metallic Thread", "Gold Work", "Silver Work", "Kundan", "Meenakari"
+];
+
+function buildCategoryPrompt(): string {
+  return `You are a garment classification expert. Your ONLY job is to identify the EXACT category of the garment in the image.
+
+AVAILABLE CATEGORIES: ${CATEGORIES.join(", ")}
+
+CRITICAL: Follow this decision tree IN ORDER. Stop at the FIRST match:
+
+1. Is it ONLY a head/face covering? → HIJAB, KHIMAR, NIQAAB, or URNA
+2. Is it ONLY a bottom garment? → PALAZZO, TROUSER, SKIRT, SHARARA, GHARARA, CHURIDAR, LEHENGA
+3. Is it ONLY a top (NOT full-length)? → KURTI, BLOUSE, SHIRT, PEPLUM, TUNIC, HOODIE, PULLOVER
+4. Is it short outerwear? → BLAZER (lapels), KOTI (sleeveless vest), SHRUG, CARDIGAN
+5. Is it one-piece top+bottom connected? → JUMPSUIT
+6. Is it a matching set (2 pieces)? → CO-ORD SET, SALWAR KAMEEZ, PRAYER SET, ABAYA 2P, FARASHA 2P, KAFTAN SET
+7. Is it draped fabric (5-6 yards)? → SAREE
+8. Is it a scarf/shawl/stole? → DUPATTA, STOLE, SHAWL, WRAP
+9. Does it have BUTTERFLY/BAT-WING sleeves or tent-like shape? → FARASHA
+10. Is it EXTREMELY loose, minimal design, full body cover with NO structure? → BORKA
+11. Does it cover from HEAD to feet with ATTACHED head covering? → JILBAB
+12. Is it loose, ornate, V-neck, NO front opening? → KAFTAN
+13. Is it a sleeveless cloak? → PONCHO or CAPE
+14. Is it open-front with wide sleeves, Japanese-inspired? → KIMONO
+15. Is it a COAT (buttons/zip, collar, coat construction)? → COAT
+16. Is it a FORMAL floor-length dress with fitted bodice, party/evening wear? → GOWN
+17. Is it a CASUAL long dress? → MAXI
+18. Is it an undergarment/slip? → INNER
+19. Is it swimwear? → BURKINI, MODEST SWIMWEAR
+20. ONLY if NONE of steps 1-19 match AND it is a structured, front-open OR A-line modest robe → ABAYA
+
+🚫 ABAYA IS NOT THE DEFAULT. Most garments are NOT abayas.
+
+Think step by step. For each step 1-20, write YES or NO. Then give your final answer.
+
+Return JSON: {"category_en": "EXACT_CATEGORY", "reasoning": "brief explanation of why this category and not others"}`;
+}
+
+function buildAnalysisPrompt(category: string): string {
+  return `You are a textile analyst. The garment category has been determined as: **${category}**
+
+Analyze the image for fabric, embellishment, color, and design details.
+
+MAP to these EXACT values:
+**FABRICS:** ${FABRICS.join(", ")}
+**EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
+
+Return ONLY this JSON:
+{
+  "fabric_name": "From FABRICS list",
+  "fabric_type": "Detailed type",
+  "embellishment": "From EMBELLISHMENTS list",
+  "color": "Precise color",
+  "craftsmanship": "Description",
+  "category": "${category}",
+  "additional_details": "Weight, opacity, stretch, care, occasion",
+  "design_details": "Describe motifs, patterns, placement in detail",
+  "confidence": "high/medium/low",
+  "product_name": "${category} — [fabric] — [embellishment]"
+}`;
+}
+
+async function callAI(apiKey: string, model: string, systemPrompt: string, userText: string, imageUrl: string) {
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: userText },
+            { type: "image_url", image_url: { url: imageUrl } },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) return { error: "Rate limited. Please try again later.", status: 429 };
+    if (response.status === 402) return { error: "Credits exhausted. Please add credits.", status: 402 };
+    const errorText = await response.text();
+    console.error("AI gateway error:", response.status, errorText);
+    throw new Error(`AI gateway error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return { content: data.choices?.[0]?.message?.content || "" };
+}
+
+function parseJSON(content: string) {
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (jsonMatch) return JSON.parse(jsonMatch[0]);
+  throw new Error("No JSON found in response");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -20,13 +165,12 @@ serve(async (req) => {
       });
     }
 
-    const { imageBase64, imageUrl } = await req.json();
+    const { imageBase64, imageUrl: externalImageUrl } = await req.json();
 
     let base64Data = imageBase64;
 
-    // If imageUrl provided, fetch and convert to base64
-    if (!base64Data && imageUrl) {
-      const imgResponse = await fetch(imageUrl);
+    if (!base64Data && externalImageUrl) {
+      const imgResponse = await fetch(externalImageUrl);
       if (!imgResponse.ok) throw new Error("Failed to fetch image from URL");
       const buffer = await imgResponse.arrayBuffer();
       base64Data = btoa(String.fromCharCode(...new Uint8Array(buffer)));
@@ -42,164 +186,62 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const CATEGORIES = [
-      "ABAYA", "ABAYA 2P", "FARASHA", "FARASHA 2P", "BLAZER", "BORKA", "KOTI", "INNER",
-      "HIJAB", "URNA", "NIQAAB", "KHIMAR", "JILBAB", "KAFTAN", "COAT", "PRAYER SET",
-      "SAREE", "KURTI", "GOWN", "MAXI",
-      "PONCHO", "CAPE", "TUNIC", "PALAZZO", "SHRUG", "CARDIGAN", "VEST", "JUMPSUIT",
-      "SKIRT", "TROUSER", "SHARARA", "GHARARA", "LEHENGA", "SALWAR KAMEEZ", "CHURIDAR",
-      "DUPATTA", "STOLE", "SHAWL", "WRAP", "KIMONO", "PEPLUM", "SHIRT", "BLOUSE",
-      "HOODIE", "PULLOVER", "KAFTAN SET", "CO-ORD SET", "BURKINI", "MODEST SWIMWEAR"
-    ];
-    const FABRICS = [
-      "Crepe", "Chiffon", "Georgette", "Nida", "Jersey", "Silk", "Cotton", "Polyester",
-      "ZOOM", "CEY", "ORGANJA", "POKA", "AROWA", "TICTOC", "PRINT", "BABLA", "BELVET", "LILEN",
-      "KASMIRI", "FAKRU PRINT", "KORIYAN SIMAR", "JORI SHIPON",
-      "Satin", "Linen", "Rayon", "Viscose", "Modal", "Tencel", "Lycra", "Spandex",
-      "Twill", "Jacquard", "Dobby", "Poplin", "Oxford",
-      "French Terry", "Ponte", "Interlock", "Rib Knit", "Pique",
-      "Bamboo", "Wool", "Acrylic", "Nylon", "Hemp", "Jute", "Ramie",
-      "Muslin", "Lawn", "Voile", "Batiste", "Cambric", "Challis", "Charmeuse",
-      "Damask", "Dupioni", "Faille", "Flannel", "Fleece", "Gabardine", "Habotai",
-      "Mikado", "Organza", "Taffeta", "Tulle", "Velour",
-      "Brocade", "Canvas", "Denim", "Drill", "Duck", "Sateen",
-      "Chambray", "Corduroy", "Crepe de Chine", "Duchess Satin",
-      "Mesh", "Net", "Scuba", "Terry Cloth", "Waffle Knit"
-    ];
-    const EMBELLISHMENTS = [
-      "Plain", "Embroidered", "Beaded", "Lace", "Sequined", "Stone Work",
-      "HAND WORK", "ARI WORK", "CREP Work",
-      "BeadSton", "LaceSton", "EmbroStone", "AriStone", "HandSton", "CrepStone", "SeqenStone",
-      "StoneFbody", "StoneHbody", "Stonehand", "StoneBack",
-      "AriHbody", "AriFBoday", "Arihand", "AriFront", "AriBack",
-      "EmbroFBody", "EmbroHbody", "EmbroHand", "EmbroFront",
-      "BelvetStone", "Belvet", "Pearl", "Applique", "Zari", "Rhinestone", "Crystal",
-      "Foil Print", "Digital Print", "Block Print", "Screen Print",
-      "Pintuck", "Pleating", "Cutwork", "Ribbon",
-      "Mirror Work", "Kantha", "Phulkari", "Chikankari", "Lucknowi",
-      "Gota Patti", "Dabka", "Resham", "Mukaish", "Tilla",
-      "Bandhani", "Tie-Dye", "Batik", "Ikat", "Shibori",
-      "Crochet", "Tassel", "Fringe", "Pom Pom", "Ruffle",
-      "Smocking", "Quilting", "Patchwork", "Shadow Work", "Aari Work",
-      "Thread Work", "Bullion Knot", "French Knot", "Cross Stitch", "Kross Stitch",
-      "Laser Cut", "Burnout", "Devore", "Flocking", "Heat Transfer",
-      "Metallic Thread", "Gold Work", "Silver Work", "Kundan", "Meenakari"
-    ];
+    const imageDataUrl = `data:image/jpeg;base64,${base64Data}`;
 
-    const systemPrompt = `You are a world-class textile analyst. Your PRIMARY skill is distinguishing between different fabric types by analyzing texture, drape, sheen, weave pattern, and surface characteristics.
+    // ===== STEP 1: Category detection =====
+    const categoryResult = await callAI(
+      LOVABLE_API_KEY,
+      "google/gemini-2.5-pro",
+      buildCategoryPrompt(),
+      "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. Stop at the FIRST match. Do NOT default to ABAYA. Return the JSON.",
+      imageDataUrl
+    );
 
-Map analysis to EXACT inventory values:
-
-**CATEGORIES:** ${CATEGORIES.join(", ")}
-**FABRICS:** ${FABRICS.join(", ")}
-**EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
-
-CRITICAL FABRIC IDENTIFICATION — Analyze texture, sheen, drape, weight, transparency:
-- DO NOT default to "Nida". Nida is ONLY smooth/matte/medium-weight with zero texture.
-- Sheer: Chiffon(flowing), Georgette(crinkled), Voile(crisp), Organza(stiff), Tulle(net-like), Net/Mesh(open weave), Batiste(ultra-fine)
-- Medium: Crepe(crinkled/matte), Crepe de Chine(smooth crepe), Cotton(natural/stiff), Lawn(fine cotton), Muslin(soft/loose), Cambric(fine/luster), Poplin(ribbed), Chambray(denim-like lighter), Challis(fluid), Viscose/Rayon(silk-like drape), Modal(very soft), Tencel(smooth/cool)
-- Heavy: ZOOM(thick/structured), Gabardine(twill/firm), Twill(diagonal), Denim(heavy twill), Canvas(sturdy), Scuba(neoprene-like)
-- Lustrous: Silk(natural glow), Satin/Sateen(reflective), Charmeuse(drapey/luster), Duchess Satin(heavy/stiff), Taffeta(crisp/sheen), Dupioni(nubby/lustrous), Habotai(soft luster), Mikado(subtle sheen), Faille(ribbed/sheen)
-- Textured: Jacquard(woven patterns), Brocade(raised patterns), Damask(reversible), Dobby(geometric), BELVET/Velvet/Velour(pile), Corduroy(ridges), Linen(wrinkled), Flannel(brushed), Fleece(fuzzy)
-- Knit: Jersey(stretchy), Ponte(structured stretch), Interlock(smooth knit), Rib Knit(ribbed), French Terry(looped back), Pique(diamond texture), Waffle Knit(grid)
-- NEVER guess — if unsure, use "medium" confidence
-
-⚠️ ANTI-ABAYA-DEFAULT WARNING ⚠️
-"ABAYA" is ONLY correct when ALL of these are true:
-  1. The garment is a LONG, FULL-LENGTH robe/dress
-  2. It has STRUCTURED shoulders (not butterfly/batwing)
-  3. It is front-open OR a closed straight/A-line cut with defined structure
-  4. It does NOT have an attached headpiece
-  5. It is NOT a formal/evening dress (that would be GOWN)
-  6. It is NOT a casual long dress (that would be MAXI)
-  7. It is NOT extremely loose/tent-shaped (that would be FARASHA or BORKA)
-  8. It is NOT ornate with V-neck without front opening (that would be KAFTAN)
-
-If even ONE condition fails, it is NOT an ABAYA. Choose the correct category instead.
-
-STEP-BY-STEP CATEGORY DECISION TREE:
-1. Is it a HEAD/FACE covering only? → HIJAB, KHIMAR, NIQAAB, URNA
-2. Is it a BOTTOM garment only? → PALAZZO, TROUSER, SKIRT, SHARARA, GHARARA, CHURIDAR
-3. Is it a TOP only (not full-length)? → KURTI, BLOUSE, SHIRT, PEPLUM, TUNIC, HOODIE, PULLOVER
-4. Is it a SHORT outerwear? → BLAZER, KOTI, SHRUG, CARDIGAN
-5. Is it a ONE-PIECE top+bottom? → JUMPSUIT
-6. Is it a MATCHING SET? → CO-ORD SET, SALWAR KAMEEZ, PRAYER SET
-7. Is it a DRAPED garment (5-6 yards)? → SAREE
-8. Is it a LEHENGA (flared skirt + top)? → LEHENGA
-9. Does it have BUTTERFLY/BAT-WING sleeves, tent-like shape? → FARASHA or FARASHA 2P
-10. Is it EXTREMELY loose, minimal design, full body cover? → BORKA
-11. Does it cover from HEAD/SHOULDERS to feet with attached headpiece? → JILBAB
-12. Is it loose, ornate, V-neck, NO front opening? → KAFTAN or KAFTAN SET
-13. Is it a sleeveless cloak/poncho? → PONCHO, CAPE
-14. Is it open-front with wide sleeves, Japanese-inspired? → KIMONO
-15. Is it a COAT-like structure with buttons/zip and collar? → COAT
-16. Is it a FORMAL floor-length dress with fitted bodice? → GOWN
-17. Is it a CASUAL long dress? → MAXI
-18. Is it an undergarment/slip? → INNER
-19. Is it a WRAP garment? → WRAP, DUPATTA, STOLE, SHAWL
-20. Is it swimwear? → BURKINI, MODEST SWIMWEAR
-21. ONLY if none of the above match AND it is a structured, full-length modest robe → ABAYA or ABAYA 2P
-
-Return JSON:
-{
-  "fabric_name": "MUST match FABRICS list — identify by ACTUAL visual characteristics",
-  "fabric_type": "Detailed type with weave",
-  "embellishment": "MUST match EMBELLISHMENTS list exactly",
-  "color": "Precise color",
-  "craftsmanship": "Quality description",
-  "category": "MUST match CATEGORIES list — follow DECISION TREE above",
-  "additional_details": "Weight, opacity, stretch, care, occasion",
-  "design_details": "Detailed description of visible motifs/patterns: flower types, vines, leaves, geometric shapes, abstract patterns, border designs, placement",
-  "confidence": "high/medium/low",
-  "product_name": "category + ' — ' + fabric_name + ' — ' + embellishment"
-}
-
-CRITICAL: All values MUST exactly match the inventory lists. Identify the ACTUAL fabric and category from visual cues.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: "Analyze this garment/fabric image carefully. Follow the STEP-BY-STEP CATEGORY DECISION TREE to identify the EXACT category. ABAYA should ONLY be selected at step 21 after ruling out ALL other categories. Return ONLY the JSON object." },
-              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Data}` } },
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again later." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error(`AI gateway error: ${response.status}`);
+    if (categoryResult.error) {
+      return new Response(JSON.stringify({ success: false, error: categoryResult.error }), {
+        status: categoryResult.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "";
+    let categoryData;
+    try {
+      categoryData = parseJSON(categoryResult.content!);
+    } catch {
+      console.error("Failed to parse category response:", categoryResult.content);
+      throw new Error("Failed to parse category result");
+    }
+
+    const detectedCategory = CATEGORIES.includes(categoryData.category_en)
+      ? categoryData.category_en
+      : "ABAYA";
+
+    // ===== STEP 2: Full analysis =====
+    const analysisResult = await callAI(
+      LOVABLE_API_KEY,
+      "google/gemini-2.5-flash",
+      buildAnalysisPrompt(detectedCategory),
+      "Analyze this garment image for fabric, embellishment, color, and design details. Return ONLY the JSON.",
+      imageDataUrl
+    );
+
+    if (analysisResult.error) {
+      return new Response(JSON.stringify({ success: false, error: analysisResult.error }), {
+        status: analysisResult.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     let analysis;
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        analysis = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No JSON found in response");
-      }
+      analysis = parseJSON(analysisResult.content!);
     } catch {
       throw new Error("Failed to parse analysis result");
     }
+
+    analysis.category = detectedCategory;
+    analysis.category_reasoning = categoryData.reasoning || "";
+    analysis.product_name = `${detectedCategory} — ${analysis.fabric_name || "Unknown"} — ${analysis.embellishment || "Plain"}`;
 
     return new Response(JSON.stringify({ success: true, analysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

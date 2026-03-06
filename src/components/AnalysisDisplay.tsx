@@ -21,6 +21,7 @@ export interface AnalysisResult {
   design_details: string;
   design_details_en: string;
   confidence: string;
+  category_reasoning?: string;
 }
 
 interface AnalysisDisplayProps {
@@ -146,9 +147,10 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ re
         {fields.map(({ key, label, icon }) => {
           const value = (result as any)[key];
           if (!value) return null;
-          // For design_details, also show Bengali version
           const bnKey = key.replace("_en", "") as keyof AnalysisResult;
           const bnValue = key === "design_details_en" ? (result as any)[bnKey] : null;
+          // Show reasoning under category
+          const reasoning = key === "category_en" ? result.category_reasoning : null;
           return (
             <div key={key} className="bg-card border border-border rounded-lg p-3 hover:border-accent/40 transition-colors">
               <div className="flex items-start gap-3">
@@ -156,6 +158,11 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ re
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
                   <p className="text-foreground font-medium text-sm leading-relaxed">{value}</p>
+                  {reasoning && (
+                    <p className="text-xs text-accent/80 leading-relaxed mt-1.5 border-t border-border pt-1.5 italic">
+                      💡 {reasoning}
+                    </p>
+                  )}
                   {bnValue && (
                     <p className="text-muted-foreground text-xs leading-relaxed mt-1 border-t border-border pt-1">
                       🇧🇩 {bnValue}
