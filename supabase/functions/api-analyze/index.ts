@@ -87,69 +87,39 @@ Return JSON: {"category_en": "EXACT_CATEGORY", "reasoning": "brief explanation o
 }
 
 function buildAnalysisPrompt(category: string): string {
-  return `You are a textile analyst. The garment category has been determined as: **${category}**
+  return `You are a textile analyst. Category is confirmed as: **${category}**.
 
-Analyze the image for fabric, embellishment, color, and design details.
+Analyze the garment image and map to EXACT output values.
 
-MAP to these EXACT values:
-**FABRICS:** ${FABRICS.join(", ")}
-**EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
+ALLOWED FABRICS (must choose ONE exact value only): ${FABRICS.join(", ")}
+ALLOWED EMBELLISHMENTS: ${EMBELLISHMENTS.join(", ")}
 
-════════════════════════════════════════
-⚠️ MANDATORY FABRIC ELIMINATION PROCESS ⚠️
-════════════════════════════════════════
+════════ FABRIC IDENTIFICATION PROTOCOL (MANDATORY) ════════
+You must do all steps below. Do NOT stop early.
 
-You MUST complete ALL 7 checks below and report findings for EACH before naming a fabric.
+STEP A — 7 Visual Checks (report each as strong/moderate/weak/none)
+1) Sheen/luster
+2) Surface texture (crinkle/grain)
+3) Transparency/sheerness
+4) Stretch/cling behavior
+5) Weight/structure/stiffness
+6) Drape/flow
+7) Natural-fiber visual cues
 
-CHECK 1 — SHEEN: Does the fabric show ANY shine, luster, or glossy reflection?
-  → YES: Satin, Silk, Charmeuse, Sateen, or Duchess Satin. STOP.
-  → NO: Continue.
+STEP B — Candidate Scoring
+- Build top 3 fabric candidates from the allowed list.
+- For each candidate, provide why it matches and why alternatives are weaker.
+- Polyester must NOT be used as a default. Choose Polyester only when visible synthetic cues support it.
+- Black color must NEVER influence fabric choice.
 
-CHECK 2 — TEXTURE: Does the surface show crinkle, pebble, grain, or roughness?
-  → YES: Crepe, Crepe de Chine. STOP.
-  → NO: Continue.
-
-CHECK 3 — TRANSPARENCY: Can you see through the fabric at all?
-  → YES: Chiffon, Georgette, Voile, or Organza. STOP.
-  → NO: Continue.
-
-CHECK 4 — STRETCH: Does the fabric appear to stretch, cling, or hug the body?
-  → YES: Jersey, Ponte, Lycra, or Scuba. STOP.
-  → NO: Continue.
-
-CHECK 5 — WEIGHT/STIFFNESS: Does the fabric appear thick, heavy, or hold its shape rigidly?
-  → YES: ZOOM, Gabardine, Twill, or Poplin. STOP.
-  → NO: Continue.
-
-CHECK 6 — DRAPE/FLOW: Does the fabric flow very softly and fluidly (but NOT sheer)?
-  → YES: Rayon, Viscose, Modal, or Challis. STOP.
-  → NO: Continue.
-
-CHECK 7 — NATURAL TEXTURE: Does it show natural fiber characteristics?
-  → YES: Cotton, Linen, Lawn, Cambric, or Muslin. STOP.
-  → NO: Continue to final assessment.
-
-FINAL ASSESSMENT — If ALL 7 checks are NO:
-Evaluate these specific fabric types carefully:
-- Nida: Medium-weight, perfectly smooth, completely matte, zero texture, slightly stiff drape. Common for structured abayas.
-- Polyester: Lightweight, smooth, may have slight synthetic sheen under light. Generic synthetic.
-- CEY: Smooth, slightly stretchy feel, soft drape, common in modest wear.
-- Nida and Polyester are DIFFERENT fabrics. Choose based on VISIBLE characteristics, not assumptions.
-
-⚠️ ANTI-BIAS RULES:
-🚫 Do NOT default to ANY single fabric. Each analysis must be independent.
-🚫 "Black" does NOT determine fabric type.
-🚫 "Smooth" alone is insufficient — describe WHAT KIND of smooth.
-🚫 If image quality prevents clear identification, set fabric_confidence to "low".
-
-CONFIDENCE RULES:
-- "high" = Clear distinctive visual cues visible
-- "medium" = Some characteristics but image quality uncertain
-- "low" = Cannot clearly determine, making best guess
+STEP C — Final Selection Rules
+- Return ONE single fabric only (no mix like “A + B”, no “A and B”).
+- If visual evidence is weak/unclear, still pick the closest single allowed fabric BUT set fabric_confidence="low".
+- "high" confidence only when there are clear, distinctive visual cues.
 
 Return ONLY this JSON:
 {
-  "fabric_name": "From FABRICS list",
+  "fabric_name": "From FABRICS list (single value)",
   "fabric_type": "Detailed type",
   "embellishment": "From EMBELLISHMENTS list",
   "color": "Precise color",
@@ -159,10 +129,53 @@ Return ONLY this JSON:
   "design_details": "Describe motifs, patterns, placement in detail",
   "confidence": "high/medium/low",
   "fabric_confidence": "high/medium/low",
-  "fabric_reasoning": "Report each CHECK 1-7 result, then explain final fabric choice",
+  "fabric_reasoning": "Report STEP A checks + STEP B top-3 scoring + final justification",
+  "fabric_top_candidates_en": ["Candidate 1", "Candidate 2", "Candidate 3"],
   "product_name": "${category} — [fabric] — [embellishment]"
 }`;
 }
+
+function buildFabricRecoveryPrompt(category: string): string {
+  return `You are a strict fabric quality gate.
+
+Category is fixed: ${category}
+
+ALLOWED FABRICS (choose exactly ONE): ${FABRICS.join(", ")}
+
+You will receive an initial analysis that may contain invalid or mixed fabric labels.
+Your job:
+1) Re-evaluate the image briefly for fabric-only cues.
+2) Pick exactly ONE canonical fabric from ALLOWED FABRICS.
+3) Never return mixed labels or out-of-list values.
+4) If uncertain, still choose the closest match but set confidence to low.
+
+Return ONLY JSON:
+{
+  "fabric_name_en": "One exact value from ALLOWED FABRICS",
+  "fabric_confidence": "high/medium/low",
+  "fabric_reasoning": "Short evidence-based explanation",
+  "fabric_top_candidates_en": ["Candidate 1", "Candidate 2", "Candidate 3"]
+}`;
+}
+
+const FABRIC_MAP = new Map(FABRICS.map((fabric) => [fabric.toLowerCase(), fabric]));
+const FABRIC_ALIASES: Record<string, string> = {
+  velvet: "BELVET",
+  velveteen: "BELVET",
+  organja: "ORGANJA",
+  organdy: "ORGANJA",
+  organdie: "ORGANJA",
+  linen: "Linen",
+  linnen: "Linen",
+  georget: "Georgette",
+  shipon: "JORI SHIPON",
+  "jori chiffon": "JORI SHIPON",
+  chiffon: "Chiffon",
+  satin: "Satin",
+  polyester: "Polyester",
+  nida: "Nida",
+  cey: "CEY",
+};
 
 async function callAI(apiKey: string, model: string, systemPrompt: string, userText: string, imageUrl: string) {
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -203,6 +216,82 @@ function parseJSON(content: string) {
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (jsonMatch) return JSON.parse(jsonMatch[0]);
   throw new Error("No JSON found in response");
+}
+
+function normalizeConfidence(value: unknown): "high" | "medium" | "low" {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (normalized === "high" || normalized === "medium" || normalized === "low") return normalized;
+  return "low";
+}
+
+function normalizeFabricName(value: unknown): { fabric: string | null; wasCompound: boolean } {
+  if (typeof value !== "string") return { fabric: null, wasCompound: false };
+
+  const cleaned = value.trim().replace(/\s+/g, " ");
+  if (!cleaned) return { fabric: null, wasCompound: false };
+
+  const direct = FABRIC_MAP.get(cleaned.toLowerCase()) ?? FABRIC_ALIASES[cleaned.toLowerCase()];
+  if (direct) return { fabric: direct, wasCompound: false };
+
+  const parts = cleaned
+    .split(/(?:,|\/|\+|\sand\s|\s&\s|\swith\s|\|)/i)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const matched = Array.from(
+    new Set(
+      parts
+        .map((part) => FABRIC_MAP.get(part.toLowerCase()) ?? FABRIC_ALIASES[part.toLowerCase()])
+        .filter((fabric): fabric is string => Boolean(fabric))
+    )
+  );
+
+  if (matched.length === 1) return { fabric: matched[0], wasCompound: parts.length > 1 };
+
+  return { fabric: null, wasCompound: parts.length > 1 || /[,+/&|]/.test(cleaned) };
+}
+
+async function recoverFabricFromImage(
+  apiKey: string,
+  imageDataUrl: string,
+  category: string,
+  analysis: Record<string, unknown>
+) {
+  const recoveryResult = await callAI(
+    apiKey,
+    "google/gemini-3-flash-preview",
+    buildFabricRecoveryPrompt(category),
+    `Initial analysis (may contain wrong/invalid fabric): ${JSON.stringify(analysis)}\nReturn corrected canonical fabric JSON only.`,
+    imageDataUrl
+  );
+
+  if (recoveryResult.error) {
+    return {
+      fabric_name_en: null,
+      fabric_confidence: "low" as const,
+      fabric_reasoning: analysis.fabric_reasoning,
+      fabric_top_candidates_en: [],
+    };
+  }
+
+  try {
+    const parsed = parseJSON(recoveryResult.content || "");
+    return {
+      fabric_name_en: parsed.fabric_name_en,
+      fabric_confidence: normalizeConfidence(parsed.fabric_confidence),
+      fabric_reasoning: parsed.fabric_reasoning,
+      fabric_top_candidates_en: Array.isArray(parsed.fabric_top_candidates_en)
+        ? parsed.fabric_top_candidates_en.slice(0, 3)
+        : [],
+    };
+  } catch {
+    return {
+      fabric_name_en: null,
+      fabric_confidence: "low" as const,
+      fabric_reasoning: analysis.fabric_reasoning,
+      fabric_top_candidates_en: [],
+    };
+  }
 }
 
 serve(async (req) => {
@@ -277,11 +366,10 @@ serve(async (req) => {
     // ===== STEP 2: Full analysis =====
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
-      "google/gemini-2.5-flash",
+      "google/gemini-3-flash-preview",
       buildAnalysisPrompt(detectedCategory),
-      `Analyze this garment image. Category is confirmed: ${detectedCategory}. 
-IMPORTANT: Complete ALL 7 fabric elimination checks before naming the fabric.
-Do NOT default to Nida for black garments. Return ONLY the JSON.`,
+      `Analyze this garment image. Category is confirmed: ${detectedCategory}.
+Follow the fabric identification protocol fully, produce top-3 candidates, and return one canonical fabric only.`,
       imageDataUrl
     );
 
@@ -297,6 +385,41 @@ Do NOT default to Nida for black garments. Return ONLY the JSON.`,
       analysis = parseJSON(analysisResult.content!);
     } catch {
       throw new Error("Failed to parse analysis result");
+    }
+
+    const rawFabric = analysis.fabric_name_en ?? analysis.fabric_name;
+    let { fabric: normalizedFabric, wasCompound } = normalizeFabricName(rawFabric);
+
+    if (!normalizedFabric) {
+      const recovered = await recoverFabricFromImage(LOVABLE_API_KEY, imageDataUrl, detectedCategory, analysis);
+      const recoveredNormalized = normalizeFabricName(recovered.fabric_name_en);
+
+      if (recoveredNormalized.fabric) {
+        normalizedFabric = recoveredNormalized.fabric;
+        wasCompound = wasCompound || recoveredNormalized.wasCompound;
+      }
+
+      if (recovered.fabric_reasoning) {
+        analysis.fabric_reasoning = recovered.fabric_reasoning;
+      }
+
+      if (recovered.fabric_top_candidates_en.length) {
+        analysis.fabric_top_candidates_en = recovered.fabric_top_candidates_en;
+      }
+
+      analysis.fabric_confidence = recovered.fabric_confidence;
+    }
+
+    if (!normalizedFabric) {
+      throw new Error("Unable to determine a reliable single fabric from the image");
+    }
+
+    analysis.fabric_name = normalizedFabric;
+    analysis.fabric_name_en = normalizedFabric;
+    analysis.fabric_confidence = normalizeConfidence(analysis.fabric_confidence);
+
+    if (wasCompound && analysis.fabric_confidence === "high") {
+      analysis.fabric_confidence = "medium";
     }
 
     analysis.category = detectedCategory;
