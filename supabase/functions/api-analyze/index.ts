@@ -113,6 +113,7 @@ Return JSON:
   "craftsmanship": "Quality description",
   "category": "MUST match CATEGORIES list exactly",
   "additional_details": "Weight, opacity, stretch, care, occasion",
+  "design_details": "Detailed description of visible motifs/patterns: flower types, vines, leaves, geometric shapes, abstract patterns, border designs, placement",
   "confidence": "high/medium/low",
   "product_name": "category + ' — ' + fabric_name + ' — ' + embellishment"
 }

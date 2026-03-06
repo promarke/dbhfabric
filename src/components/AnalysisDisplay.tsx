@@ -18,6 +18,8 @@ export interface AnalysisResult {
   category_en: string;
   additional_details: string;
   additional_details_en: string;
+  design_details: string;
+  design_details_en: string;
   confidence: string;
 }
 
@@ -34,6 +36,7 @@ const fields = [
   { key: "color_en", label: "Color", icon: "🎨" },
   { key: "craftsmanship_en", label: "Craftsmanship", icon: "🖌️" },
   { key: "category_en", label: "Category", icon: "📂" },
+  { key: "design_details_en", label: "Design Details", icon: "🌸" },
   { key: "additional_details_en", label: "Additional Details", icon: "📝" },
 ] as const;
 

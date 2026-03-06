@@ -9,6 +9,7 @@ const fields = [
   { key: "color_en", label: "Color" },
   { key: "craftsmanship_en", label: "Craftsmanship" },
   { key: "category_en", label: "Category" },
+  { key: "design_details_en", label: "Design Details" },
   { key: "additional_details_en", label: "Additional Details" },
 ] as const;
 

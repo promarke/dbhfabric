@@ -189,6 +189,8 @@ When given an image, return a JSON object:
   "category_en": "MUST be one from CATEGORIES list above.",
   "additional_details": "অতিরিক্ত তথ্য (বাংলায়)",
   "additional_details_en": "Weight, opacity, stretch, care, occasion, season details",
+  "design_details": "কারুকাজের বিস্তারিত বিবরণ (বাংলায়) — ফুলের ধরণ, লতা-পাতা, জ্যামিতিক নকশা ইত্যাদি",
+  "design_details_en": "Detailed description of visible motifs, patterns: flower types (rose, lily, daisy, paisley), vines, leaves, geometric shapes, abstract patterns, border designs, placement (neckline, hemline, sleeves, all-over, panel). Describe EXACTLY what you see.",
   "confidence": "high/medium/low",
   "product_name": "Auto-generated: category_en + fabric_name_en + embellishment_en joined by space-dash-space"
 }
