@@ -95,21 +95,49 @@ MAP to these EXACT values:
 **FABRICS:** ${FABRICS.join(", ")}
 **EMBELLISHMENTS:** ${EMBELLISHMENTS.join(", ")}
 
-🚫 CRITICAL: "Nida" is NOT a default for black fabrics. Black color does NOT mean Nida.
+════════════════════════════════════════
+⚠️ MANDATORY FABRIC ELIMINATION PROCESS ⚠️
+════════════════════════════════════════
 
-FABRIC IDENTIFICATION — analyze texture, sheen, drape, weight CAREFULLY:
-- Sheer/semi-transparent/flowing → Chiffon, Georgette, Voile, Organza
-- Crinkled/pebbly/textured surface → Crepe, Crepe de Chine
-- High sheen/lustrous/glossy → Silk, Satin, Charmeuse, Sateen
-- Stretchy/body-hugging/knit → Jersey, Ponte, Lycra, Scuba
-- Thick/structured/stiff → ZOOM, Gabardine, Twill, Poplin
-- Soft/drapey/fluid (NOT sheer) → Rayon, Viscose, Modal, Challis
-- Natural texture → Cotton, Linen, Lawn, Cambric
-- Woven patterns → Jacquard, Brocade, Damask, Dobby
-- Soft pile → BELVET/Velvet, Velour
-- Medium weight, smooth, matte, NO texture, NO sheen, NO crinkle → Nida (VERY specific)
+You MUST complete ALL 7 checks below and report findings for EACH before naming a fabric.
 
-DECISION PROCESS: Check sheen→texture→transparency→stretch→weight→drape FIRST. ONLY if ALL are negative → consider Nida.
+CHECK 1 — SHEEN: Does the fabric show ANY shine, luster, or glossy reflection?
+  → YES: Satin, Silk, Charmeuse, Sateen, or Duchess Satin. STOP.
+  → NO: Continue.
+
+CHECK 2 — TEXTURE: Does the surface show crinkle, pebble, grain, or roughness?
+  → YES: Crepe, Crepe de Chine. STOP.
+  → NO: Continue.
+
+CHECK 3 — TRANSPARENCY: Can you see through the fabric at all?
+  → YES: Chiffon, Georgette, Voile, or Organza. STOP.
+  → NO: Continue.
+
+CHECK 4 — STRETCH: Does the fabric appear to stretch, cling, or hug the body?
+  → YES: Jersey, Ponte, Lycra, or Scuba. STOP.
+  → NO: Continue.
+
+CHECK 5 — WEIGHT/STIFFNESS: Does the fabric appear thick, heavy, or hold its shape rigidly?
+  → YES: ZOOM, Gabardine, Twill, or Poplin. STOP.
+  → NO: Continue.
+
+CHECK 6 — DRAPE/FLOW: Does the fabric flow very softly and fluidly (but NOT sheer)?
+  → YES: Rayon, Viscose, Modal, or Challis. STOP.
+  → NO: Continue.
+
+CHECK 7 — NATURAL TEXTURE: Does it show natural fiber characteristics?
+  → YES: Cotton, Linen, Lawn, Cambric, or Muslin. STOP.
+  → NO: Continue to final assessment.
+
+FINAL: ONLY if ALL 7 checks are genuinely NO → then it MAY be Nida.
+🚫 "Nida" is NEVER the answer just because the garment is BLACK.
+🚫 "smooth" alone is NOT enough — many fabrics are smooth.
+🚫 If uncertain, choose Polyester or Crepe instead of Nida.
+
+CONFIDENCE RULES:
+- "high" = Clear distinctive visual cues visible
+- "medium" = Some characteristics but image quality uncertain
+- "low" = Cannot clearly determine, making best guess
 
 Return ONLY this JSON:
 {
@@ -123,7 +151,7 @@ Return ONLY this JSON:
   "design_details": "Describe motifs, patterns, placement in detail",
   "confidence": "high/medium/low",
   "fabric_confidence": "high/medium/low",
-  "fabric_reasoning": "Explain WHY this fabric was identified: what visual cues led to this conclusion",
+  "fabric_reasoning": "Report each CHECK 1-7 result, then explain final fabric choice",
   "product_name": "${category} — [fabric] — [embellishment]"
 }`;
 }
@@ -137,6 +165,7 @@ async function callAI(apiKey: string, model: string, systemPrompt: string, userT
     },
     body: JSON.stringify({
       model,
+      temperature: 0.1,
       messages: [
         { role: "system", content: systemPrompt },
         {
@@ -172,7 +201,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Validate API key
     const apiKey = req.headers.get("x-api-key");
     const DBH_API_KEY = Deno.env.get("DBH_API_KEY");
     if (!DBH_API_KEY) throw new Error("DBH_API_KEY is not configured");
@@ -232,14 +260,20 @@ serve(async (req) => {
 
     const detectedCategory = CATEGORIES.includes(categoryData.category_en)
       ? categoryData.category_en
-      : "ABAYA";
+      : null;
+
+    if (!detectedCategory) {
+      throw new Error(`Unknown category: ${categoryData.category_en}`);
+    }
 
     // ===== STEP 2: Full analysis =====
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
       "google/gemini-2.5-flash",
       buildAnalysisPrompt(detectedCategory),
-      "Analyze this garment image for fabric, embellishment, color, and design details. Return ONLY the JSON.",
+      `Analyze this garment image. Category is confirmed: ${detectedCategory}. 
+IMPORTANT: Complete ALL 7 fabric elimination checks before naming the fabric.
+Do NOT default to Nida for black garments. Return ONLY the JSON.`,
       imageDataUrl
     );
 
