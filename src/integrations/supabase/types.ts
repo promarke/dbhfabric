@@ -92,6 +92,44 @@ export type Database = {
         }
         Relationships: []
       }
+      fabric_corrections: {
+        Row: {
+          analysis_id: string
+          corrected_fabric: string
+          created_at: string
+          id: string
+          notes: string | null
+          original_category: string | null
+          original_fabric: string
+        }
+        Insert: {
+          analysis_id: string
+          corrected_fabric: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          original_category?: string | null
+          original_fabric: string
+        }
+        Update: {
+          analysis_id?: string
+          corrected_fabric?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          original_category?: string | null
+          original_fabric?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fabric_corrections_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analysis_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
