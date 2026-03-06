@@ -7,8 +7,14 @@ interface HistoryItem {
   id: string;
   fabric_name: string;
   fabric_name_en: string;
+  fabric_type: string;
+  fabric_type_en: string;
+  embellishment: string;
+  embellishment_en: string;
   color: string;
   color_en: string;
+  craftsmanship: string;
+  craftsmanship_en: string;
   category: string;
   category_en: string;
   confidence: string;
@@ -20,11 +26,18 @@ interface HistoryItem {
 const HistoryRow: React.FC<{ item: HistoryItem; onDelete: (id: string) => void }> = ({ item, onDelete }) => {
   const [copied, setCopied] = React.useState(false);
 
+  const productName = [item.category_en, item.fabric_name_en, item.embellishment_en].filter(Boolean).join(" ") || "Unknown Product";
+
   const handleCopy = () => {
     const text = [
+      `Product: ${productName}`,
       item.fabric_name_en && `Fabric: ${item.fabric_name_en}`,
+      item.fabric_type_en && `Type: ${item.fabric_type_en}`,
       item.category_en && `Category: ${item.category_en}`,
       item.color_en && `Color: ${item.color_en}`,
+      item.embellishment_en && `Embellishment: ${item.embellishment_en}`,
+      item.craftsmanship_en && `Craftsmanship: ${item.craftsmanship_en}`,
+      item.design_details_en && `Design: ${item.design_details_en}`,
     ].filter(Boolean).join("\n");
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -35,11 +48,11 @@ const HistoryRow: React.FC<{ item: HistoryItem; onDelete: (id: string) => void }
   return (
     <div className="flex items-center justify-between px-4 py-3 hover:bg-muted/30">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-foreground truncate">
-          {item.fabric_name_en || item.fabric_name || "Unknown"}
+        <p className="text-sm font-semibold text-foreground truncate">
+          📋 {productName}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {item.category_en || item.category} • {item.color_en || item.color} • {new Date(item.created_at).toLocaleDateString()}
+        <p className="text-xs text-muted-foreground mt-0.5">
+          {item.color_en || item.color} • {item.fabric_type_en || item.fabric_name_en || item.fabric_name} • {new Date(item.created_at).toLocaleDateString()}
         </p>
         {(item.design_details_en || item.design_details) && (
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -66,7 +79,7 @@ const HistoryPanel: React.FC = () => {
     setLoading(true);
     const { data } = await supabase
       .from("analysis_history")
-      .select("id, fabric_name, fabric_name_en, color, color_en, category, category_en, confidence, created_at, design_details, design_details_en")
+      .select("id, fabric_name, fabric_name_en, fabric_type, fabric_type_en, embellishment, embellishment_en, color, color_en, craftsmanship, craftsmanship_en, category, category_en, confidence, created_at, design_details, design_details_en")
       .order("created_at", { ascending: false })
       .limit(20);
     setItems((data as HistoryItem[]) || []);
