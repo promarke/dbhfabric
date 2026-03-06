@@ -1,6 +1,7 @@
 import React from "react";
 import { Loader2, Copy, Check } from "lucide-react";
 import PdfDownloadButton from "./PdfDownloadButton";
+import FabricCorrectionButton from "./FabricCorrectionButton";
 import { toast } from "sonner";
 
 export interface AnalysisResult {
