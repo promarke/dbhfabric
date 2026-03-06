@@ -104,21 +104,57 @@ CRITICAL FABRIC IDENTIFICATION — Analyze texture, sheen, drape, weight, transp
 - Knit: Jersey(stretchy), Ponte(structured stretch), Interlock(smooth knit), Rib Knit(ribbed), French Terry(looped back), Pique(diamond texture), Waffle Knit(grid)
 - NEVER guess — if unsure, use "medium" confidence
 
+⚠️ ANTI-ABAYA-DEFAULT WARNING ⚠️
+"ABAYA" is ONLY correct when ALL of these are true:
+  1. The garment is a LONG, FULL-LENGTH robe/dress
+  2. It has STRUCTURED shoulders (not butterfly/batwing)
+  3. It is front-open OR a closed straight/A-line cut with defined structure
+  4. It does NOT have an attached headpiece
+  5. It is NOT a formal/evening dress (that would be GOWN)
+  6. It is NOT a casual long dress (that would be MAXI)
+  7. It is NOT extremely loose/tent-shaped (that would be FARASHA or BORKA)
+  8. It is NOT ornate with V-neck without front opening (that would be KAFTAN)
+
+If even ONE condition fails, it is NOT an ABAYA. Choose the correct category instead.
+
+STEP-BY-STEP CATEGORY DECISION TREE:
+1. Is it a HEAD/FACE covering only? → HIJAB, KHIMAR, NIQAAB, URNA
+2. Is it a BOTTOM garment only? → PALAZZO, TROUSER, SKIRT, SHARARA, GHARARA, CHURIDAR
+3. Is it a TOP only (not full-length)? → KURTI, BLOUSE, SHIRT, PEPLUM, TUNIC, HOODIE, PULLOVER
+4. Is it a SHORT outerwear? → BLAZER, KOTI, SHRUG, CARDIGAN
+5. Is it a ONE-PIECE top+bottom? → JUMPSUIT
+6. Is it a MATCHING SET? → CO-ORD SET, SALWAR KAMEEZ, PRAYER SET
+7. Is it a DRAPED garment (5-6 yards)? → SAREE
+8. Is it a LEHENGA (flared skirt + top)? → LEHENGA
+9. Does it have BUTTERFLY/BAT-WING sleeves, tent-like shape? → FARASHA or FARASHA 2P
+10. Is it EXTREMELY loose, minimal design, full body cover? → BORKA
+11. Does it cover from HEAD/SHOULDERS to feet with attached headpiece? → JILBAB
+12. Is it loose, ornate, V-neck, NO front opening? → KAFTAN or KAFTAN SET
+13. Is it a sleeveless cloak/poncho? → PONCHO, CAPE
+14. Is it open-front with wide sleeves, Japanese-inspired? → KIMONO
+15. Is it a COAT-like structure with buttons/zip and collar? → COAT
+16. Is it a FORMAL floor-length dress with fitted bodice? → GOWN
+17. Is it a CASUAL long dress? → MAXI
+18. Is it an undergarment/slip? → INNER
+19. Is it a WRAP garment? → WRAP, DUPATTA, STOLE, SHAWL
+20. Is it swimwear? → BURKINI, MODEST SWIMWEAR
+21. ONLY if none of the above match AND it is a structured, full-length modest robe → ABAYA or ABAYA 2P
+
 Return JSON:
 {
-  "fabric_name": "MUST match FABRICS list — identify by ACTUAL visual characteristics, not guess",
+  "fabric_name": "MUST match FABRICS list — identify by ACTUAL visual characteristics",
   "fabric_type": "Detailed type with weave",
   "embellishment": "MUST match EMBELLISHMENTS list exactly",
   "color": "Precise color",
   "craftsmanship": "Quality description",
-  "category": "MUST match CATEGORIES list exactly",
+  "category": "MUST match CATEGORIES list — follow DECISION TREE above",
   "additional_details": "Weight, opacity, stretch, care, occasion",
   "design_details": "Detailed description of visible motifs/patterns: flower types, vines, leaves, geometric shapes, abstract patterns, border designs, placement",
   "confidence": "high/medium/low",
   "product_name": "category + ' — ' + fabric_name + ' — ' + embellishment"
 }
 
-CRITICAL: All values MUST exactly match the inventory lists. Identify the ACTUAL fabric from visual cues.`;
+CRITICAL: All values MUST exactly match the inventory lists. Identify the ACTUAL fabric and category from visual cues.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -133,7 +169,7 @@ CRITICAL: All values MUST exactly match the inventory lists. Identify the ACTUAL
           {
             role: "user",
             content: [
-              { type: "text", text: "Analyze this fabric/garment image and return ONLY the JSON object." },
+              { type: "text", text: "Analyze this garment/fabric image carefully. Follow the STEP-BY-STEP CATEGORY DECISION TREE to identify the EXACT category. ABAYA should ONLY be selected at step 21 after ruling out ALL other categories. Return ONLY the JSON object." },
               { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Data}` } },
             ],
           },
