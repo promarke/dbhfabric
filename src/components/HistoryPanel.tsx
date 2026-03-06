@@ -13,6 +13,8 @@ interface HistoryItem {
   category_en: string;
   confidence: string;
   created_at: string;
+  design_details: string;
+  design_details_en: string;
 }
 
 const HistoryRow: React.FC<{ item: HistoryItem; onDelete: (id: string) => void }> = ({ item, onDelete }) => {
@@ -39,6 +41,11 @@ const HistoryRow: React.FC<{ item: HistoryItem; onDelete: (id: string) => void }
         <p className="text-xs text-muted-foreground">
           {item.category_en || item.category} • {item.color_en || item.color} • {new Date(item.created_at).toLocaleDateString()}
         </p>
+        {(item.design_details_en || item.design_details) && (
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+            🌸 {item.design_details_en || item.design_details}
+          </p>
+        )}
       </div>
       <button onClick={handleCopy} className="p-1.5 text-muted-foreground hover:text-accent transition-colors ml-1">
         {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
@@ -59,7 +66,7 @@ const HistoryPanel: React.FC = () => {
     setLoading(true);
     const { data } = await supabase
       .from("analysis_history")
-      .select("id, fabric_name, fabric_name_en, color, color_en, category, category_en, confidence, created_at")
+      .select("id, fabric_name, fabric_name_en, color, color_en, category, category_en, confidence, created_at, design_details, design_details_en")
       .order("created_at", { ascending: false })
       .limit(20);
     setItems((data as HistoryItem[]) || []);
