@@ -129,10 +129,18 @@ CHECK 7 — NATURAL TEXTURE: Does it show natural fiber characteristics?
   → YES: Cotton, Linen, Lawn, Cambric, or Muslin. STOP.
   → NO: Continue to final assessment.
 
-FINAL: ONLY if ALL 7 checks are genuinely NO → then it MAY be Nida.
-🚫 "Nida" is NEVER the answer just because the garment is BLACK.
-🚫 "smooth" alone is NOT enough — many fabrics are smooth.
-🚫 If uncertain, choose Polyester or Crepe instead of Nida.
+FINAL ASSESSMENT — If ALL 7 checks are NO:
+Evaluate these specific fabric types carefully:
+- Nida: Medium-weight, perfectly smooth, completely matte, zero texture, slightly stiff drape. Common for structured abayas.
+- Polyester: Lightweight, smooth, may have slight synthetic sheen under light. Generic synthetic.
+- CEY: Smooth, slightly stretchy feel, soft drape, common in modest wear.
+- Nida and Polyester are DIFFERENT fabrics. Choose based on VISIBLE characteristics, not assumptions.
+
+⚠️ ANTI-BIAS RULES:
+🚫 Do NOT default to ANY single fabric. Each analysis must be independent.
+🚫 "Black" does NOT determine fabric type.
+🚫 "Smooth" alone is insufficient — describe WHAT KIND of smooth.
+🚫 If image quality prevents clear identification, set fabric_confidence to "low".
 
 CONFIDENCE RULES:
 - "high" = Clear distinctive visual cues visible
