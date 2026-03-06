@@ -22,6 +22,8 @@ export interface AnalysisResult {
   design_details_en: string;
   confidence: string;
   category_reasoning?: string;
+  fabric_confidence?: string;
+  fabric_reasoning?: string;
 }
 
 interface AnalysisDisplayProps {
@@ -42,9 +44,9 @@ const fields = [
 ] as const;
 
 const getConfidenceInfo = (confidence: string) => {
-  if (confidence === "high") return { color: "bg-green-100 text-green-800 border-green-300", label: "High" };
-  if (confidence === "medium") return { color: "bg-yellow-100 text-yellow-800 border-yellow-300", label: "Medium" };
-  return { color: "bg-red-100 text-red-800 border-red-300", label: "Low" };
+  if (confidence === "high") return { color: "bg-green-100 text-green-800 border-green-300", label: "High", emoji: "🟢" };
+  if (confidence === "medium") return { color: "bg-yellow-100 text-yellow-800 border-yellow-300", label: "Medium", emoji: "🟡" };
+  return { color: "bg-red-100 text-red-800 border-red-300", label: "Low", emoji: "🔴" };
 };
 
 const CopyButton: React.FC<{ text: string; label: string }> = ({ text, label }) => {
@@ -151,13 +153,28 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ re
           const bnValue = key === "design_details_en" ? (result as any)[bnKey] : null;
           // Show reasoning under category
           const reasoning = key === "category_en" ? result.category_reasoning : null;
+          // Show fabric confidence under fabric name
+          const fabricConf = key === "fabric_name_en" && result.fabric_confidence ? getConfidenceInfo(result.fabric_confidence) : null;
+          const fabricReasoning = key === "fabric_name_en" ? result.fabric_reasoning : null;
           return (
             <div key={key} className="bg-card border border-border rounded-lg p-3 hover:border-accent/40 transition-colors">
               <div className="flex items-start gap-3">
                 <span className="text-xl mt-0.5">{icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
-                  <p className="text-foreground font-medium text-sm leading-relaxed">{value}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-foreground font-medium text-sm leading-relaxed">{value}</p>
+                    {fabricConf && (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${fabricConf.color}`}>
+                        {fabricConf.emoji} {fabricConf.label}
+                      </span>
+                    )}
+                  </div>
+                  {fabricReasoning && (
+                    <p className="text-xs text-accent/80 leading-relaxed mt-1.5 border-t border-border pt-1.5 italic">
+                      🔍 {fabricReasoning}
+                    </p>
+                  )}
                   {reasoning && (
                     <p className="text-xs text-accent/80 leading-relaxed mt-1.5 border-t border-border pt-1.5 italic">
                       💡 {reasoning}
