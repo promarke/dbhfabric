@@ -196,15 +196,51 @@ When given an image, return a JSON object:
 }
 
 CRITICAL RULES:
-- category_en MUST exactly match one from CATEGORIES list — IDENTIFY THE ACTUAL GARMENT TYPE. DO NOT default to "ABAYA".
+- category_en MUST exactly match one from CATEGORIES list — IDENTIFY THE ACTUAL GARMENT TYPE.
 
-CATEGORY IDENTIFICATION GUIDE (use these visual cues):
-  * ABAYA: Fitted or semi-fitted, front-open or closed, structured shoulders, traditional modest robe with defined waistline or straight cut
-  * FARASHA: Butterfly/bat-wing sleeves, very loose/flowing, NO defined waist, tent-like silhouette, wide flared shape — if the garment has extremely wide/flowy sleeves and a loose A-line or tent shape, it is FARASHA not ABAYA
-  * FARASHA 2P: Same as FARASHA but comes as a two-piece set
-  * ABAYA 2P: Abaya style but comes as a two-piece set
+⚠️ ANTI-ABAYA-DEFAULT WARNING ⚠️
+"ABAYA" is ONLY correct when ALL of these are true:
+  1. The garment is a LONG, FULL-LENGTH robe/dress
+  2. It has STRUCTURED shoulders (not butterfly/batwing)
+  3. It is front-open OR a closed straight/A-line cut with defined structure
+  4. It does NOT have an attached headpiece
+  5. It is NOT a formal/evening dress (that would be GOWN)
+  6. It is NOT a casual long dress (that would be MAXI)
+  7. It is NOT extremely loose/tent-shaped (that would be FARASHA or BORKA)
+  8. It is NOT ornate with V-neck without front opening (that would be KAFTAN)
+
+If even ONE condition fails, it is NOT an ABAYA. Choose the correct category instead.
+
+STEP-BY-STEP CATEGORY DECISION TREE:
+1. Is it a HEAD/FACE covering only? → HIJAB (square/rectangle), KHIMAR (extends to waist+), NIQAAB (face veil), URNA (long scarf)
+2. Is it a BOTTOM garment only? → PALAZZO (wide-leg), TROUSER, SKIRT, SHARARA, GHARARA, CHURIDAR
+3. Is it a TOP only (not full-length)? → KURTI (fitted), BLOUSE, SHIRT, PEPLUM, TUNIC, HOODIE, PULLOVER
+4. Is it a SHORT outerwear? → BLAZER (with lapels), KOTI (sleeveless vest), SHRUG, CARDIGAN
+5. Is it a ONE-PIECE top+bottom? → JUMPSUIT
+6. Is it a MATCHING SET (top+bottom)? → CO-ORD SET, SALWAR KAMEEZ, PRAYER SET
+7. Is it a DRAPED garment (5-6 yards)? → SAREE
+8. Is it a LEHENGA (flared skirt + top)? → LEHENGA
+9. Does it have BUTTERFLY/BAT-WING sleeves, tent-like shape? → FARASHA (1pc) or FARASHA 2P (2pc)
+10. Is it EXTREMELY loose, minimal design, full body cover? → BORKA
+11. Does it cover from HEAD/SHOULDERS to feet with attached headpiece? → JILBAB
+12. Is it loose, ornate, V-neck, NO front opening? → KAFTAN or KAFTAN SET
+13. Is it a sleeveless cloak/poncho? → PONCHO (pullover), CAPE (draped over shoulders)
+14. Is it open-front with wide sleeves, Japanese-inspired? → KIMONO
+15. Is it a COAT-like structure with buttons/zip and collar? → COAT
+16. Is it a FORMAL floor-length dress with fitted bodice? → GOWN
+17. Is it a CASUAL long dress? → MAXI
+18. Is it an undergarment/slip? → INNER
+19. Is it a WRAP garment? → WRAP, DUPATTA, STOLE, SHAWL
+20. Is it swimwear? → BURKINI, MODEST SWIMWEAR
+21. ONLY if none of the above match AND it is a structured, full-length modest robe → ABAYA (1pc) or ABAYA 2P (2pc)
+
+CATEGORY VISUAL CUES:
+  * ABAYA: Fitted or semi-fitted, front-open or closed, structured shoulders, traditional modest robe — ONLY use after ruling out all other categories above
+  * FARASHA: Butterfly/bat-wing sleeves, very loose/flowing, NO defined waist, tent-like silhouette — if sleeves are extremely wide/flowy, it is FARASHA not ABAYA
+  * FARASHA 2P: Same as FARASHA but two-piece set
+  * ABAYA 2P: Abaya style but two-piece set
   * KAFTAN: Loose, ankle-length, ornate, often with V-neck or embellished neckline, no front opening
-  * BORKA: Full-body covering, often one-piece, very loose, minimal design
+  * BORKA: Full-body covering, one-piece, very loose, minimal design, often darker colors
   * JILBAB: Long outer garment, covers from head/shoulders to feet, often with attached headpiece
   * COAT: Structured, front-button/zip, collar, coat-like construction
   * BLAZER: Short structured jacket with lapels
@@ -214,12 +250,12 @@ CATEGORY IDENTIFICATION GUIDE (use these visual cues):
   * NIQAAB: Face veil
   * URNA: Long scarf/shawl
   * KURTI: Short to knee-length fitted top
-  * GOWN: Floor-length formal dress, fitted bodice
-  * MAXI: Long casual dress
+  * GOWN: Floor-length formal dress, fitted bodice, evening/party wear
+  * MAXI: Long casual dress, relaxed fit
   * SAREE: Draped fabric, 5-6 yards
   * PRAYER SET: Matching set specifically for prayer
-  * CO-ORD SET: Matching top and bottom set
-  * PALAZZO: Wide-leg pants
+  * CO-ORD SET: Matching top and bottom set, coordinated design
+  * PALAZZO: Wide-leg pants/trousers
   * TROUSER: Regular pants/trousers
   * JUMPSUIT: One-piece top+bottom connected
   * SKIRT: Bottom garment, various lengths
@@ -227,6 +263,11 @@ CATEGORY IDENTIFICATION GUIDE (use these visual cues):
   * CAPE: Sleeveless cloak draped over shoulders
   * KIMONO: Open-front, wide sleeves, Japanese-inspired
   * INNER: Undergarment/slip worn beneath outer garments
+  * LEHENGA: Flared/full skirt, often with separate top
+  * SALWAR KAMEEZ: Tunic top with matching pants
+  * SHARARA/GHARARA: Flared pants with tunic
+  * BURKINI: Modest full-coverage swimwear
+
 - fabric_name_en MUST exactly match one from FABRICS list — IDENTIFY THE ACTUAL FABRIC, do not default to Nida
 - embellishment_en MUST exactly match one from EMBELLISHMENTS list
 - product_name = category_en + " — " + fabric_name_en + " — " + embellishment_en
@@ -246,7 +287,7 @@ CATEGORY IDENTIFICATION GUIDE (use these visual cues):
           {
             role: "user",
             content: [
-              { type: "text", text: "Analyze this garment/fabric image. Identify the EXACT category from the CATEGORIES list based on what you SEE — do NOT default to ABAYA. Determine the garment type by its silhouette, structure, and design features. Return ONLY the JSON object with no extra text." },
+              { type: "text", text: "Analyze this garment/fabric image carefully. Follow the STEP-BY-STEP CATEGORY DECISION TREE to identify the EXACT category. Go through each step in order — ABAYA should ONLY be selected at step 21 after ruling out ALL other categories. Determine the garment type by its silhouette, sleeve style, structure, length, and design features. Return ONLY the JSON object with no extra text." },
               { type: "image_url", image_url: { url: `data:${imageMime};base64,${imageBase64}` } },
             ],
           },
