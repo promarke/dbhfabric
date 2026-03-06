@@ -361,12 +361,48 @@ serve(async (req) => {
 
     console.log("Detected category:", detectedCategory, "Reasoning:", categoryData.reasoning);
 
+    // ===== Fetch recent corrections for bias hints =====
+    let correctionHint = "";
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const sb = createClient(supabaseUrl, supabaseKey);
+      const { data: corrData } = await sb
+        .from("fabric_corrections")
+        .select("original_fabric, corrected_fabric")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (corrData && corrData.length > 0) {
+        const patternMap = new Map<string, Map<string, number>>();
+        corrData.forEach((c: any) => {
+          if (!patternMap.has(c.original_fabric)) patternMap.set(c.original_fabric, new Map());
+          const inner = patternMap.get(c.original_fabric)!;
+          inner.set(c.corrected_fabric, (inner.get(c.corrected_fabric) || 0) + 1);
+        });
+
+        const hints: string[] = [];
+        patternMap.forEach((corrections, original) => {
+          const sorted = Array.from(corrections.entries()).sort((a, b) => b[1] - a[1]);
+          const top = sorted[0];
+          const total = Array.from(corrections.values()).reduce((s, n) => s + n, 0);
+          hints.push(`"${original}" was frequently wrong (${total}x corrected) — often should be "${top[0]}" instead.`);
+        });
+
+        if (hints.length > 0) {
+          correctionHint = `\n\n⚠️ KNOWN BIAS CORRECTIONS (from user feedback):\n${hints.join("\n")}\nConsider these patterns when making your fabric choice.`;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch corrections:", e);
+    }
+
     // ===== STEP 2: Full analysis =====
     console.log("Step 2: Full analysis with category:", detectedCategory);
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
       "google/gemini-3-flash-preview",
-      buildAnalysisPrompt(detectedCategory),
+      buildAnalysisPrompt(detectedCategory) + correctionHint,
       `Analyze this garment image. Category is confirmed: ${detectedCategory}.
 Follow the fabric identification protocol fully, produce top-3 candidates, and return one canonical fabric only.`,
       imageUrl
