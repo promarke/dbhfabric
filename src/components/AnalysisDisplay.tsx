@@ -1,6 +1,7 @@
 import React from "react";
 import { Loader2, Copy, Check } from "lucide-react";
 import PdfDownloadButton from "./PdfDownloadButton";
+import FabricCorrectionButton from "./FabricCorrectionButton";
 import { toast } from "sonner";
 
 export interface AnalysisResult {
@@ -174,6 +175,12 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ re
                     <p className="text-xs text-accent/80 leading-relaxed mt-1.5 border-t border-border pt-1.5 italic">
                       🔍 {fabricReasoning}
                     </p>
+                  )}
+                  {key === "fabric_name_en" && (
+                    <FabricCorrectionButton
+                      currentFabric={value}
+                      currentCategory={result.category_en}
+                    />
                   )}
                   {reasoning && (
                     <p className="text-xs text-accent/80 leading-relaxed mt-1.5 border-t border-border pt-1.5 italic">
