@@ -380,11 +380,12 @@ serve(async (req) => {
     console.log("Step 2: Full analysis with category:", detectedCategory);
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
-      "google/gemini-3-flash-preview",
+      "google/gemini-2.5-flash",
       buildAnalysisPrompt(detectedCategory) + correctionHint,
       `Analyze this garment image. Category is confirmed: ${detectedCategory}.
 Follow the fabric identification protocol fully, produce top-3 candidates, and return one canonical fabric only.`,
-      imageUrl
+      imageUrl,
+      1536
     );
 
     if (analysisResult.error) {

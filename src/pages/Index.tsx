@@ -92,9 +92,8 @@ const Index = () => {
     setAnalysisResults([]);
 
     try {
-      const results: { result: AnalysisResult; preview: string; historyId: string | null }[] = [];
-
-      for (const img of images) {
+      // Analyze all images in parallel for maximum speed
+      const promises = images.map(async (img) => {
         const { data, error: fnError } = await supabase.functions.invoke("analyze-abaya", {
           body: { imageBase64: img.base64, mimeType: img.mimeType },
         });
@@ -103,10 +102,13 @@ const Index = () => {
         if (data?.error) throw new Error(data.error);
         if (data?.analysis) {
           const historyId = await saveToHistory(data.analysis);
-          results.push({ result: data.analysis, preview: img.preview, historyId });
+          return { result: data.analysis as AnalysisResult, preview: img.preview, historyId };
         }
-      }
+        return null;
+      });
 
+      const settled = await Promise.all(promises);
+      const results = settled.filter((r): r is NonNullable<typeof r> => r !== null);
       setAnalysisResults(results);
     } catch (e: any) {
       console.error("Analysis error:", e);
