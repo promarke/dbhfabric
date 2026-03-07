@@ -178,6 +178,7 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number; historyId
                   )}
                   {key === "fabric_name_en" && (
                     <FabricCorrectionButton
+                      analysisId={historyId || undefined}
                       currentFabric={value}
                       currentCategory={result.category_en}
                     />
