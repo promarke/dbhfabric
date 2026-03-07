@@ -32,7 +32,7 @@ const features: FeatureItem[] = [
 
 const Index = () => {
   const [images, setImages] = useState<ImageItem[]>([]);
-  const [analysisResults, setAnalysisResults] = useState<{ result: AnalysisResult; preview: string }[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<{ result: AnalysisResult; preview: string; historyId: string | null }[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<FeatureItem | null>(null);
@@ -54,9 +54,9 @@ const Index = () => {
     setError(null);
   }, []);
 
-  const saveToHistory = async (result: AnalysisResult) => {
+  const saveToHistory = async (result: AnalysisResult): Promise<string | null> => {
     try {
-      await supabase.from("analysis_history").insert({
+      const { data } = await supabase.from("analysis_history").insert({
         fabric_name: result.fabric_name,
         fabric_name_en: result.fabric_name_en,
         fabric_type: result.fabric_type,
@@ -77,9 +77,11 @@ const Index = () => {
         fabric_confidence: result.fabric_confidence,
         fabric_reasoning: result.fabric_reasoning,
         category_reasoning: result.category_reasoning,
-      });
+      }).select("id").single();
+      return data?.id || null;
     } catch (e) {
       console.error("Failed to save history:", e);
+      return null;
     }
   };
 
@@ -90,7 +92,7 @@ const Index = () => {
     setAnalysisResults([]);
 
     try {
-      const results: { result: AnalysisResult; preview: string }[] = [];
+      const results: { result: AnalysisResult; preview: string; historyId: string | null }[] = [];
 
       for (const img of images) {
         const { data, error: fnError } = await supabase.functions.invoke("analyze-abaya", {
@@ -100,8 +102,8 @@ const Index = () => {
         if (fnError) throw fnError;
         if (data?.error) throw new Error(data.error);
         if (data?.analysis) {
-          results.push({ result: data.analysis, preview: img.preview });
-          await saveToHistory(data.analysis);
+          const historyId = await saveToHistory(data.analysis);
+          results.push({ result: data.analysis, preview: img.preview, historyId });
         }
       }
 

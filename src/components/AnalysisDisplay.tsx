@@ -28,7 +28,7 @@ export interface AnalysisResult {
 }
 
 interface AnalysisDisplayProps {
-  results: { result: AnalysisResult; preview: string }[];
+  results: { result: AnalysisResult; preview: string; historyId?: string | null }[];
   isLoading: boolean;
   error: string | null;
 }
@@ -111,7 +111,7 @@ const generateProductNames = (result: AnalysisResult & { product_name?: string }
   return { shortName, detailedName };
 };
 
-const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ result, index }) => {
+const SingleResult: React.FC<{ result: AnalysisResult; index?: number; historyId?: string | null }> = ({ result, index, historyId }) => {
   const conf = getConfidenceInfo(result.confidence);
   const { shortName, detailedName } = generateProductNames(result);
   return (
@@ -178,6 +178,7 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ re
                   )}
                   {key === "fabric_name_en" && (
                     <FabricCorrectionButton
+                      analysisId={historyId || undefined}
                       currentFabric={value}
                       currentCategory={result.category_en}
                     />
@@ -242,13 +243,13 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ results, isLoading, e
             {results.map((r, i) => (
               <div key={i} className="border border-border rounded-lg p-4 bg-card">
                 <img src={r.preview} alt={`Image ${i + 1}`} className="w-full h-32 object-contain bg-muted/30 rounded mb-3" />
-                <SingleResult result={r.result} index={i} />
+                <SingleResult result={r.result} index={i} historyId={r.historyId} />
               </div>
             ))}
           </div>
         </>
       ) : (
-        <SingleResult result={results[0].result} />
+        <SingleResult result={results[0].result} historyId={results[0].historyId} />
       )}
       <PdfDownloadButton results={results.map((r) => r.result)} />
     </div>

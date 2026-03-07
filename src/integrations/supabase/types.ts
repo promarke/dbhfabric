@@ -120,15 +120,7 @@ export type Database = {
           original_category?: string | null
           original_fabric?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "fabric_corrections_analysis_id_fkey"
-            columns: ["analysis_id"]
-            isOneToOne: false
-            referencedRelation: "analysis_history"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
