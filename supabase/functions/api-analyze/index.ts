@@ -261,10 +261,11 @@ async function recoverFabricFromImage(
 ) {
   const recoveryResult = await callAI(
     apiKey,
-    "google/gemini-3-flash-preview",
+    "google/gemini-2.5-flash",
     buildFabricRecoveryPrompt(category),
     `Initial analysis (may contain wrong/invalid fabric): ${JSON.stringify(analysis)}\nReturn corrected canonical fabric JSON only.`,
-    imageDataUrl
+    imageDataUrl,
+    512
   );
 
   if (recoveryResult.error) {
