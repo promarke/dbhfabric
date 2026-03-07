@@ -188,7 +188,7 @@ const FABRIC_ALIASES: Record<string, string> = {
   cey: "CEY",
 };
 
-async function callAI(apiKey: string, model: string, systemPrompt: string, userText: string, imageUrl: string) {
+async function callAI(apiKey: string, model: string, systemPrompt: string, userText: string, imageUrl: string, maxTokens = 2048) {
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -198,6 +198,7 @@ async function callAI(apiKey: string, model: string, systemPrompt: string, userT
     body: JSON.stringify({
       model,
       temperature: 0.1,
+      max_tokens: maxTokens,
       messages: [
         { role: "system", content: systemPrompt },
         {
