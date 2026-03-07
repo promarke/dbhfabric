@@ -243,7 +243,7 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ results, isLoading, e
             {results.map((r, i) => (
               <div key={i} className="border border-border rounded-lg p-4 bg-card">
                 <img src={r.preview} alt={`Image ${i + 1}`} className="w-full h-32 object-contain bg-muted/30 rounded mb-3" />
-                <SingleResult result={r.result} index={i} />
+                <SingleResult result={r.result} index={i} historyId={r.historyId} />
               </div>
             ))}
           </div>
