@@ -249,7 +249,7 @@ const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ results, isLoading, e
           </div>
         </>
       ) : (
-        <SingleResult result={results[0].result} />
+        <SingleResult result={results[0].result} historyId={results[0].historyId} />
       )}
       <PdfDownloadButton results={results.map((r) => r.result)} />
     </div>
