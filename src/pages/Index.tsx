@@ -54,9 +54,9 @@ const Index = () => {
     setError(null);
   }, []);
 
-  const saveToHistory = async (result: AnalysisResult) => {
+  const saveToHistory = async (result: AnalysisResult): Promise<string | null> => {
     try {
-      await supabase.from("analysis_history").insert({
+      const { data } = await supabase.from("analysis_history").insert({
         fabric_name: result.fabric_name,
         fabric_name_en: result.fabric_name_en,
         fabric_type: result.fabric_type,
@@ -77,9 +77,11 @@ const Index = () => {
         fabric_confidence: result.fabric_confidence,
         fabric_reasoning: result.fabric_reasoning,
         category_reasoning: result.category_reasoning,
-      });
+      }).select("id").single();
+      return data?.id || null;
     } catch (e) {
       console.error("Failed to save history:", e);
+      return null;
     }
   };
 
