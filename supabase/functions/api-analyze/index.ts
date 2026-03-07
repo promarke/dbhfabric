@@ -178,7 +178,7 @@ const FABRIC_ALIASES: Record<string, string> = {
   cey: "CEY",
 };
 
-async function callAI(apiKey: string, model: string, systemPrompt: string, userText: string, imageUrl: string) {
+async function callAI(apiKey: string, model: string, systemPrompt: string, userText: string, imageUrl: string, maxTokens = 2048) {
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -188,6 +188,7 @@ async function callAI(apiKey: string, model: string, systemPrompt: string, userT
     body: JSON.stringify({
       model,
       temperature: 0.1,
+      max_tokens: maxTokens,
       messages: [
         { role: "system", content: systemPrompt },
         {
@@ -260,10 +261,11 @@ async function recoverFabricFromImage(
 ) {
   const recoveryResult = await callAI(
     apiKey,
-    "google/gemini-3-flash-preview",
+    "google/gemini-2.5-flash",
     buildFabricRecoveryPrompt(category),
     `Initial analysis (may contain wrong/invalid fabric): ${JSON.stringify(analysis)}\nReturn corrected canonical fabric JSON only.`,
-    imageDataUrl
+    imageDataUrl,
+    512
   );
 
   if (recoveryResult.error) {
@@ -332,82 +334,64 @@ serve(async (req) => {
 
     const imageDataUrl = `data:image/jpeg;base64,${base64Data}`;
 
-    // ===== STEP 1: Category detection =====
-    const categoryResult = await callAI(
+    // ===== STEP 1 + Corrections: Run in PARALLEL =====
+    const categoryPromise = callAI(
       LOVABLE_API_KEY,
-      "google/gemini-2.5-pro",
+      "google/gemini-2.5-flash",
       buildCategoryPrompt(),
       "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. Stop at the FIRST match. Do NOT default to ABAYA. Return the JSON.",
-      imageDataUrl
+      imageDataUrl,
+      512
     );
 
-    if (categoryResult.error) {
-      return new Response(JSON.stringify({ success: false, error: categoryResult.error }), {
-        status: categoryResult.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const correctionPromise = (async () => {
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const sb = createClient(supabaseUrl, supabaseKey);
+        const { data: corrData } = await sb
+          .from("fabric_corrections")
+          .select("original_fabric, corrected_fabric")
+          .order("created_at", { ascending: false })
+          .limit(50);
 
-    let categoryData;
-    try {
-      categoryData = parseJSON(categoryResult.content!);
-    } catch {
-      console.error("Failed to parse category response:", categoryResult.content);
-      throw new Error("Failed to parse category result");
-    }
+        if (corrData && corrData.length > 0) {
+          const patternMap = new Map<string, Map<string, number>>();
+          corrData.forEach((c: any) => {
+            if (!patternMap.has(c.original_fabric)) patternMap.set(c.original_fabric, new Map());
+            const inner = patternMap.get(c.original_fabric)!;
+            inner.set(c.corrected_fabric, (inner.get(c.corrected_fabric) || 0) + 1);
+          });
 
-    const detectedCategory = CATEGORIES.includes(categoryData.category_en)
-      ? categoryData.category_en
-      : null;
+          const hints: string[] = [];
+          patternMap.forEach((corrections, original) => {
+            const sorted = Array.from(corrections.entries()).sort((a, b) => b[1] - a[1]);
+            const top = sorted[0];
+            const total = Array.from(corrections.values()).reduce((s, n) => s + n, 0);
+            hints.push(`"${original}" was frequently wrong (${total}x corrected) — often should be "${top[0]}" instead.`);
+          });
 
-    if (!detectedCategory) {
-      throw new Error(`Unknown category: ${categoryData.category_en}`);
-    }
-
-    // ===== Fetch recent corrections for bias hints =====
-    let correctionHint = "";
-    try {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const sb = createClient(supabaseUrl, supabaseKey);
-      const { data: corrData } = await sb
-        .from("fabric_corrections")
-        .select("original_fabric, corrected_fabric")
-        .order("created_at", { ascending: false })
-        .limit(50);
-
-      if (corrData && corrData.length > 0) {
-        const patternMap = new Map<string, Map<string, number>>();
-        corrData.forEach((c: any) => {
-          if (!patternMap.has(c.original_fabric)) patternMap.set(c.original_fabric, new Map());
-          const inner = patternMap.get(c.original_fabric)!;
-          inner.set(c.corrected_fabric, (inner.get(c.corrected_fabric) || 0) + 1);
-        });
-
-        const hints: string[] = [];
-        patternMap.forEach((corrections, original) => {
-          const sorted = Array.from(corrections.entries()).sort((a, b) => b[1] - a[1]);
-          const top = sorted[0];
-          const total = Array.from(corrections.values()).reduce((s, n) => s + n, 0);
-          hints.push(`"${original}" was frequently wrong (${total}x corrected) — often should be "${top[0]}" instead.`);
-        });
-
-        if (hints.length > 0) {
-          correctionHint = `\n\n⚠️ KNOWN BIAS CORRECTIONS (from user feedback):\n${hints.join("\n")}\nConsider these patterns when making your fabric choice.`;
+          if (hints.length > 0) {
+            return `\n\n⚠️ KNOWN BIAS CORRECTIONS (from user feedback):\n${hints.join("\n")}\nConsider these patterns when making your fabric choice.`;
+          }
         }
+      } catch (e) {
+        console.error("Failed to fetch corrections:", e);
       }
-    } catch (e) {
-      console.error("Failed to fetch corrections:", e);
-    }
+      return "";
+    })();
+
+    const [categoryResult, correctionHint] = await Promise.all([categoryPromise, correctionPromise]);
 
     // ===== STEP 2: Full analysis =====
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
-      "google/gemini-3-flash-preview",
+      "google/gemini-2.5-flash",
       buildAnalysisPrompt(detectedCategory) + correctionHint,
       `Analyze this garment image. Category is confirmed: ${detectedCategory}.
 Follow the fabric identification protocol fully, produce top-3 candidates, and return one canonical fabric only.`,
-      imageDataUrl
+      imageDataUrl,
+      1536
     );
 
     if (analysisResult.error) {
