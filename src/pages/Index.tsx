@@ -92,7 +92,7 @@ const Index = () => {
     setAnalysisResults([]);
 
     try {
-      const results: { result: AnalysisResult; preview: string }[] = [];
+      const results: { result: AnalysisResult; preview: string; historyId: string | null }[] = [];
 
       for (const img of images) {
         const { data, error: fnError } = await supabase.functions.invoke("analyze-abaya", {
@@ -102,8 +102,8 @@ const Index = () => {
         if (fnError) throw fnError;
         if (data?.error) throw new Error(data.error);
         if (data?.analysis) {
-          results.push({ result: data.analysis, preview: img.preview });
-          await saveToHistory(data.analysis);
+          const historyId = await saveToHistory(data.analysis);
+          results.push({ result: data.analysis, preview: img.preview, historyId });
         }
       }
 
