@@ -111,7 +111,7 @@ const generateProductNames = (result: AnalysisResult & { product_name?: string }
   return { shortName, detailedName };
 };
 
-const SingleResult: React.FC<{ result: AnalysisResult; index?: number }> = ({ result, index }) => {
+const SingleResult: React.FC<{ result: AnalysisResult; index?: number; historyId?: string | null }> = ({ result, index, historyId }) => {
   const conf = getConfidenceInfo(result.confidence);
   const { shortName, detailedName } = generateProductNames(result);
   return (
