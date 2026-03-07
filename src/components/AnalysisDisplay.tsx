@@ -28,7 +28,7 @@ export interface AnalysisResult {
 }
 
 interface AnalysisDisplayProps {
-  results: { result: AnalysisResult; preview: string }[];
+  results: { result: AnalysisResult; preview: string; historyId?: string | null }[];
   isLoading: boolean;
   error: string | null;
 }
