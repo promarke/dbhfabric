@@ -32,7 +32,7 @@ const features: FeatureItem[] = [
 
 const Index = () => {
   const [images, setImages] = useState<ImageItem[]>([]);
-  const [analysisResults, setAnalysisResults] = useState<{ result: AnalysisResult; preview: string }[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<{ result: AnalysisResult; preview: string; historyId: string | null }[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<FeatureItem | null>(null);
