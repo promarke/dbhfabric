@@ -178,11 +178,6 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number; historyId
                       currentCategory={result.category_en}
                     />
                   )}
-                  {reasoning && (
-                    <p className="text-xs text-accent/80 leading-relaxed mt-1.5 border-t border-border pt-1.5 italic">
-                      💡 {reasoning}
-                    </p>
-                  )}
                   {bnValue && (
                     <p className="text-muted-foreground text-xs leading-relaxed mt-1 border-t border-border pt-1">
                       🇧🇩 {bnValue}
