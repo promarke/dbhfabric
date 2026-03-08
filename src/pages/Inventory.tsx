@@ -60,6 +60,21 @@ const Inventory = () => {
     setLoading(false);
   };
 
+  const fetchStock = async () => {
+    const { data, error } = await supabase
+      .from("product_variants")
+      .select("product_id, stock");
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const map: Record<string, number> = {};
+    (data || []).forEach((variant: any) => {
+      map[variant.product_id] = (map[variant.product_id] || 0) + variant.stock;
+    });
+    setStockMap(map);
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
