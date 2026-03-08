@@ -6,7 +6,7 @@ import AnalysisProgress from "@/components/AnalysisProgress";
 import HistoryPanel from "@/components/HistoryPanel";
 import FeatureModal from "@/components/FeatureModal";
 import StyleGuide from "@/components/StyleGuide";
-import { Sparkles, Copy, FolderUp, Palette, Scissors, Search, FileText, Zap, Code, BarChart3, LucideIcon } from "lucide-react";
+import { Sparkles, Copy, FolderUp, Palette, Scissors, Search, FileText, Zap, Code, BarChart3, Package, LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ImageItem {
