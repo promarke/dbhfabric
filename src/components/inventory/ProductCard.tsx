@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Star, Trash2, Edit2, Package } from "lucide-react";
+import { Star, Trash2, Edit2, Package, Eye } from "lucide-react";
 import type { Product } from "@/pages/Inventory";
 import VariantManager from "./VariantManager";
+import ProductDetailModal from "./ProductDetailModal";
 
 interface ProductCardProps {
   product: Product;
