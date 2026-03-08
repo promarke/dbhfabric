@@ -337,7 +337,7 @@ serve(async (req) => {
     // ===== STEP 1 + Corrections: Run in PARALLEL =====
     const categoryPromise = callAI(
       LOVABLE_API_KEY,
-      "google/gemini-2.5-flash",
+      "google/gemini-2.5-pro",
       buildCategoryPrompt(),
       "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. Stop at the FIRST match. Do NOT default to ABAYA. Return the JSON.",
       imageDataUrl,
