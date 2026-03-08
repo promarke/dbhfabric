@@ -6,7 +6,7 @@ import AnalysisProgress from "@/components/AnalysisProgress";
 import HistoryPanel from "@/components/HistoryPanel";
 import FeatureModal from "@/components/FeatureModal";
 import StyleGuide from "@/components/StyleGuide";
-import { Sparkles, Copy, FolderUp, Palette, Scissors, Search, FileText, Zap, Code, BarChart3, LucideIcon } from "lucide-react";
+import { Sparkles, Copy, FolderUp, Palette, Scissors, Search, FileText, Zap, Code, BarChart3, Package, LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ImageItem {
@@ -209,6 +209,9 @@ const Index = () => {
       <footer className="text-center py-8 text-xs text-muted-foreground border-t border-border space-y-2">
         <div><span className="font-display font-bold text-foreground">DBH FINDER</span> — AI-Powered Analysis</div>
         <div className="flex items-center justify-center gap-4">
+          <Link to="/inventory" className="inline-flex items-center gap-1.5 text-accent hover:text-accent/80 transition-colors text-xs font-medium">
+            <Package className="w-3.5 h-3.5" /> Inventory
+          </Link>
           <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-accent hover:text-accent/80 transition-colors text-xs font-medium">
             <BarChart3 className="w-3.5 h-3.5" /> Dashboard
           </Link>

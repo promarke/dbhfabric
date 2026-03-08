@@ -122,6 +122,97 @@ export type Database = {
         }
         Relationships: []
       }
+      product_variants: {
+        Row: {
+          color: string
+          id: string
+          product_id: string
+          size: string
+          stock: number
+        }
+        Insert: {
+          color: string
+          id?: string
+          product_id: string
+          size: string
+          stock?: number
+        }
+        Update: {
+          color?: string
+          id?: string
+          product_id?: string
+          size?: string
+          stock?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          analysis_id: string | null
+          category: string
+          colors: string[]
+          created_at: string
+          description: string | null
+          discount_price: number | null
+          fabric_type: string | null
+          featured: boolean
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          sizes: string[]
+          video_url: string | null
+        }
+        Insert: {
+          analysis_id?: string | null
+          category?: string
+          colors?: string[]
+          created_at?: string
+          description?: string | null
+          discount_price?: number | null
+          fabric_type?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          name: string
+          price?: number
+          sizes?: string[]
+          video_url?: string | null
+        }
+        Update: {
+          analysis_id?: string | null
+          category?: string
+          colors?: string[]
+          created_at?: string
+          description?: string | null
+          discount_price?: number | null
+          fabric_type?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          sizes?: string[]
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analysis_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

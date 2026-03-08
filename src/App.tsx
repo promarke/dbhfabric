@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Install from "./pages/Install";
 import ApiDocs from "./pages/ApiDocs";
 import Dashboard from "./pages/Dashboard";
+import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/install" element={<Install />} />
           <Route path="/api-docs" element={<ApiDocs />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/inventory" element={<Inventory />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
