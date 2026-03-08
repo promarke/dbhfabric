@@ -18,13 +18,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFe
   return (
     <>
       <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-accent/40 transition-colors group">
-        {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover bg-muted/30" />
-        ) : (
-          <div className="w-full h-40 bg-muted/30 flex items-center justify-center text-muted-foreground text-sm">
-            No Image
-          </div>
-        )}
+        <button onClick={() => setShowDetail(true)} className="w-full cursor-pointer">
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover bg-muted/30" />
+          ) : (
+            <div className="w-full h-40 bg-muted/30 flex items-center justify-center text-muted-foreground text-sm">
+              No Image
+            </div>
+          )}
+        </button>
         <div className="p-3 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
