@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Upload, Image as ImageIcon } from "lucide-react";
 import type { Product } from "@/pages/Inventory";
 
 const DEFAULT_SIZES = ['52"', '54"', '56"', '58"', '60"'];
@@ -34,6 +34,8 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
   const [newSize, setNewSize] = useState("");
   const [newColor, setNewColor] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (editProduct) {
@@ -48,6 +50,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
       setSizes(editProduct.sizes || DEFAULT_SIZES);
       setColors(editProduct.colors || ["Black"]);
       setFeatured(editProduct.featured);
+      if (editProduct.image_url) setImagePreview(editProduct.image_url);
     } else if (prefill) {
       if (prefill.name) setName(prefill.name);
       if (prefill.category) setCategory(prefill.category);
@@ -56,6 +59,36 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
       if (prefill.description) setDescription(prefill.description);
     }
   }, [editProduct, prefill]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please select an image file");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Image must be under 5MB");
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, file, { contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      setImageUrl(urlData.publicUrl);
+      setImagePreview(urlData.publicUrl);
+      toast.success("Image uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleAddSize = () => {
     const s = newSize.trim();
@@ -99,7 +132,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
         const { error } = await supabase.from("products").update(productData).eq("id", editProduct.id);
         if (error) throw error;
         productId = editProduct.id;
-        // Delete old variants and recreate
         await supabase.from("product_variants").delete().eq("product_id", productId);
       } else {
         const { data, error } = await supabase.from("products").insert(productData).select("id").single();
@@ -107,7 +139,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
         productId = (data as any).id;
       }
 
-      // Create variants: each size × color = 5 default stock
       const variants = sizes.flatMap((size) =>
         colors.map((color) => ({
           product_id: productId,
@@ -140,13 +171,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Name */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Product Name *</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Nida Abaya Black" />
           </div>
 
-          {/* Category */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Category *</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-3 py-2 rounded-md border border-input bg-background text-sm">
@@ -157,7 +186,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
             </select>
           </div>
 
-          {/* Price row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-muted-foreground mb-1 block">Price (৳) *</label>
@@ -169,16 +197,35 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
             </div>
           </div>
 
-          {/* Fabric Type */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Fabric Type</label>
             <Input value={fabricType} onChange={(e) => setFabricType(e.target.value)} placeholder="e.g. Nida, Zoom, Jorjet" />
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Image URL</label>
-            <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="Paste image URL" />
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Product Image</label>
+            {imagePreview && (
+              <div className="relative mb-2">
+                <img src={imagePreview} alt="Preview" className="w-full h-32 object-contain bg-muted/30 rounded-lg" />
+                <button onClick={() => { setImagePreview(null); setImageUrl(""); }} className="absolute top-1 right-1 p-1 bg-background/80 rounded-full hover:bg-destructive/20">
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <label className={`flex items-center gap-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm cursor-pointer hover:bg-muted transition-colors ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+                <Upload className="w-4 h-4 text-muted-foreground" />
+                {uploading ? "Uploading..." : "Upload"}
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+              <Input
+                value={imageUrl}
+                onChange={(e) => { setImageUrl(e.target.value); setImagePreview(e.target.value || null); }}
+                placeholder="Or paste image URL"
+                className="flex-1"
+              />
+            </div>
           </div>
 
           {/* Video URL */}
@@ -187,7 +234,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
             <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="Paste video URL (optional)" />
           </div>
 
-          {/* Description */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
             <textarea
@@ -205,9 +251,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
               {sizes.map((s) => (
                 <span key={s} className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-muted rounded-md">
                   {s}
-                  <button onClick={() => setSizes(sizes.filter((x) => x !== s))} className="hover:text-destructive">
-                    <X className="w-3 h-3" />
-                  </button>
+                  <button onClick={() => setSizes(sizes.filter((x) => x !== s))} className="hover:text-destructive"><X className="w-3 h-3" /></button>
                 </span>
               ))}
             </div>
@@ -224,9 +268,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
               {colors.map((c) => (
                 <span key={c} className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-muted rounded-md">
                   {c}
-                  <button onClick={() => setColors(colors.filter((x) => x !== c))} className="hover:text-destructive">
-                    <X className="w-3 h-3" />
-                  </button>
+                  <button onClick={() => setColors(colors.filter((x) => x !== c))} className="hover:text-destructive"><X className="w-3 h-3" /></button>
                 </span>
               ))}
             </div>
@@ -236,13 +278,11 @@ const AddProductModal: React.FC<AddProductModalProps> = ({ open, onOpenChange, o
             </div>
           </div>
 
-          {/* Featured */}
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={featured} onChange={(e) => setFeatured(e.target.checked)} className="rounded border-input" />
             <span className="text-sm text-foreground">Featured on homepage</span>
           </label>
 
-          {/* Variant info */}
           <div className="bg-muted/50 rounded-lg p-3 text-xs text-muted-foreground">
             <strong>{sizes.length} sizes × {colors.length} colors = {sizes.length * colors.length} variants</strong> — each with default 5 stock
           </div>
