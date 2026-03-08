@@ -135,9 +135,12 @@ const Index = () => {
             <br />
             <span className="text-primary-foreground">FINDER</span>
           </h1>
-          <p className="text-primary-foreground/60 text-sm max-w-md mx-auto leading-relaxed">
+          <p className="text-primary-foreground/60 text-sm max-w-md mx-auto leading-relaxed mb-4">
             AI-powered fabric &amp; garment analysis — fast data entry for POS &amp; inventory systems.
           </p>
+          <Link to="/inventory" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-accent text-accent-foreground font-semibold text-sm hover:opacity-90 transition-all hover-scale">
+            <Package className="w-4 h-4" /> Inventory
+          </Link>
         </div>
       </header>
 
