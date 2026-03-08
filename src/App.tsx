@@ -23,6 +23,7 @@ const App = () => (
           <Route path="/install" element={<Install />} />
           <Route path="/api-docs" element={<ApiDocs />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/inventory" element={<Inventory />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

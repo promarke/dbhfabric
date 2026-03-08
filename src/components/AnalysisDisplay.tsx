@@ -122,6 +122,7 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number; historyId
           {index !== undefined ? `Image ${index + 1} — Results` : "Analysis Results"}
         </h3>
         <div className="flex items-center gap-2">
+          <AddToInventoryButton result={result} historyId={historyId} />
           <CopyAllButton result={result} />
           <span className={`text-xs font-medium px-3 py-1 rounded-full border ${conf.color}`}>
             Confidence: {conf.label}
