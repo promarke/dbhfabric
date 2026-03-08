@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Download, Plus, Trash2, Edit2, Star, Package, Search } from "lucide-react";
+import { ArrowLeft, Download, Plus, Package, Search, Upload, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import AddProductModal from "@/components/inventory/AddProductModal";
 import ProductCard from "@/components/inventory/ProductCard";
+import CSVImportModal from "@/components/inventory/CSVImportModal";
+import CatalogModal from "@/components/inventory/CatalogModal";
 
 export interface Product {
   id: string;
