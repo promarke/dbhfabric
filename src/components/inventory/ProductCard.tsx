@@ -6,6 +6,7 @@ import ProductDetailModal from "./ProductDetailModal";
 
 interface ProductCardProps {
   product: Product;
+  stock: number;
   onDelete: (id: string) => void;
   onToggleFeatured: (id: string, current: boolean) => void;
   onEdit: (product: Product) => void;
