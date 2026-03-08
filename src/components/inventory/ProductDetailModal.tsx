@@ -90,7 +90,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ open, onOpenCha
           </button>
           <button
             onClick={shareOnWhatsApp}
-            className="flex-1 py-2.5 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+            className="flex-1 py-2.5 rounded-xl bg-whatsapp text-white font-semibold text-sm hover:bg-whatsapp-dark transition-all flex items-center justify-center gap-2"
           >
             <MessageCircle className="w-4 h-4" /> WhatsApp শেয়ার
           </button>
