@@ -1,6 +1,6 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Star } from "lucide-react";
+import { Copy, Star, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/pages/Inventory";
 
@@ -55,6 +55,12 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ open, onOpenCha
     copyToClipboard(text, "সকল তথ্য");
   };
 
+  const shareOnWhatsApp = () => {
+    const message = `*${product.name}*\n\n${product.description ? product.description + "\n\n" : ""}দাম: ৳${product.discount_price != null ? product.discount_price : product.price}\nফেব্রিক: ${product.fabric_type}\nসাইজ: ${product.sizes.join(", ")}\nরং: ${product.colors.join(", ")}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
@@ -75,12 +81,20 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ open, onOpenCha
           ))}
         </div>
 
-        <button
-          onClick={copyAll}
-          className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
-        >
-          <Copy className="w-4 h-4" /> সব তথ্য কপি করুন
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={copyAll}
+            className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
+          >
+            <Copy className="w-4 h-4" /> কপি করুন
+          </button>
+          <button
+            onClick={shareOnWhatsApp}
+            className="flex-1 py-2.5 rounded-xl bg-whatsapp text-white font-semibold text-sm hover:bg-whatsapp-dark transition-all flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4" /> WhatsApp শেয়ার
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

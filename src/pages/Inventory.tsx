@@ -43,6 +43,7 @@ const Inventory = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [showImport, setShowImport] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
+  const [stockMap, setStockMap] = useState<Record<string, number>>({});
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -59,8 +60,24 @@ const Inventory = () => {
     setLoading(false);
   };
 
+  const fetchStock = async () => {
+    const { data, error } = await supabase
+      .from("product_variants")
+      .select("product_id, stock");
+    if (error) {
+      console.error(error);
+      return;
+    }
+    const map: Record<string, number> = {};
+    (data || []).forEach((variant: any) => {
+      map[variant.product_id] = (map[variant.product_id] || 0) + variant.stock;
+    });
+    setStockMap(map);
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchStock();
   }, []);
 
   const categories = useMemo(() => {
@@ -200,6 +217,7 @@ const Inventory = () => {
               <ProductCard
                 key={product.id}
                 product={product}
+                stock={stockMap[product.id] || 0}
                 onDelete={handleDelete}
                 onToggleFeatured={handleToggleFeatured}
                 onEdit={(p) => { setEditProduct(p); setShowAddModal(true); }}
