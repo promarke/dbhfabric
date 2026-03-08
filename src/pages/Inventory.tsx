@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Download, Plus, Trash2, Edit2, Star, Package, Search } from "lucide-react";
+import { ArrowLeft, Download, Plus, Package, Search, Upload, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import AddProductModal from "@/components/inventory/AddProductModal";
 import ProductCard from "@/components/inventory/ProductCard";
+import CSVImportModal from "@/components/inventory/CSVImportModal";
+import CatalogModal from "@/components/inventory/CatalogModal";
 
 export interface Product {
   id: string;
@@ -39,6 +41,8 @@ const Inventory = () => {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [showImport, setShowImport] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -130,7 +134,13 @@ const Inventory = () => {
             <h1 className="text-3xl font-display font-bold flex items-center gap-2">
               <Package className="w-7 h-7" /> Inventory
             </h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button onClick={() => setShowCatalog(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 text-sm font-medium transition-colors">
+                <Share2 className="w-4 h-4" /> Catalog
+              </button>
+              <button onClick={() => setShowImport(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 text-sm font-medium transition-colors">
+                <Upload className="w-4 h-4" /> Import
+              </button>
               <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 text-sm font-medium transition-colors">
                 <Download className="w-4 h-4" /> CSV
               </button>
@@ -207,6 +217,9 @@ const Inventory = () => {
           editProduct={editProduct}
         />
       )}
+
+      <CSVImportModal open={showImport} onOpenChange={setShowImport} onImported={fetchProducts} />
+      <CatalogModal open={showCatalog} onOpenChange={setShowCatalog} products={products} />
     </div>
   );
 };
