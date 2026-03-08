@@ -61,6 +61,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFe
           <p className="text-[10px] text-muted-foreground">{product.fabric_type} · {product.sizes.length} sizes</p>
 
           <div className="flex items-center gap-1 pt-1 border-t border-border">
+            <button onClick={() => setShowDetail(true)} className="flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+              <Eye className="w-3 h-3" /> Details
+            </button>
             <button onClick={() => onEdit(product)} className="flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
               <Edit2 className="w-3 h-3" /> Edit
             </button>
@@ -82,6 +85,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFe
         onOpenChange={setShowVariants}
         productId={product.id}
         productName={product.name}
+      />
+
+      <ProductDetailModal
+        open={showDetail}
+        onOpenChange={setShowDetail}
+        product={product}
       />
     </>
   );
