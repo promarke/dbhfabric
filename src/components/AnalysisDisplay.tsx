@@ -205,20 +205,7 @@ const SingleResult: React.FC<{ result: AnalysisResult; index?: number; historyId
 };
 
 const AnalysisDisplay: React.FC<AnalysisDisplayProps> = ({ results, isLoading, error }) => {
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 gap-4">
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          </div>
-          <div className="absolute inset-0 rounded-full border-2 border-accent/30 pulse-gold" />
-        </div>
-        <p className="text-muted-foreground text-lg">Analyzing...</p>
-        <p className="text-sm text-muted-foreground">Processing image(s)...</p>
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
   if (error) {
     return (
