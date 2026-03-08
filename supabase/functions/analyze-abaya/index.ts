@@ -335,7 +335,7 @@ serve(async (req) => {
       buildCategoryPrompt(),
       "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. Stop at the FIRST match. Do NOT default to ABAYA. Return the JSON.",
       imageUrl,
-      512
+      1536
     );
 
     const correctionPromise = (async () => {
