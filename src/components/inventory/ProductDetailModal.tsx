@@ -55,6 +55,12 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ open, onOpenCha
     copyToClipboard(text, "সকল তথ্য");
   };
 
+  const shareOnWhatsApp = () => {
+    const message = `*${product.name}*\n\n${product.description ? product.description + "\n\n" : ""}দাম: ৳${product.discount_price != null ? product.discount_price : product.price}\nফেব্রিক: ${product.fabric_type}\nসাইজ: ${product.sizes.join(", ")}\nরং: ${product.colors.join(", ")}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
