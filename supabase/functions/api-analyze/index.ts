@@ -383,6 +383,24 @@ serve(async (req) => {
 
     const [categoryResult, correctionHint] = await Promise.all([categoryPromise, correctionPromise]);
 
+    // Parse category result
+    if (categoryResult.error) {
+      return new Response(JSON.stringify({ success: false, error: categoryResult.error }), {
+        status: categoryResult.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let categoryData: { category_en?: string; reasoning?: string };
+    try {
+      categoryData = parseJSON(categoryResult.content || "");
+    } catch {
+      console.error("Failed to parse category:", categoryResult.content);
+      throw new Error("Category detection failed.");
+    }
+
+    const detectedCategory = (categoryData.category_en || "ABAYA").toUpperCase().trim();
+
     // ===== STEP 2: Full analysis =====
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
