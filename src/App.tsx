@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Install from "./pages/Install";
 import ApiDocs from "./pages/ApiDocs";
 import Dashboard from "./pages/Dashboard";
+import Inventory from "./pages/Inventory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
