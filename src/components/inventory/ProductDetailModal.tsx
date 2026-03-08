@@ -81,12 +81,20 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ open, onOpenCha
           ))}
         </div>
 
-        <button
-          onClick={copyAll}
-          className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
-        >
-          <Copy className="w-4 h-4" /> সব তথ্য কপি করুন
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={copyAll}
+            className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2"
+          >
+            <Copy className="w-4 h-4" /> কপি করুন
+          </button>
+          <button
+            onClick={shareOnWhatsApp}
+            className="flex-1 py-2.5 rounded-xl bg-green-600 text-white font-semibold text-sm hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4" /> WhatsApp শেয়ার
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );
