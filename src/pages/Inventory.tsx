@@ -77,6 +77,7 @@ const Inventory = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchStock();
   }, []);
 
   const categories = useMemo(() => {
