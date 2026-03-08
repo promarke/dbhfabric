@@ -1,6 +1,6 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Copy, Star } from "lucide-react";
+import { Copy, Star, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/pages/Inventory";
 
