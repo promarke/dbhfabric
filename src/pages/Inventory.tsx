@@ -41,6 +41,8 @@ const Inventory = () => {
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
+  const [showImport, setShowImport] = useState(false);
+  const [showCatalog, setShowCatalog] = useState(false);
 
   const fetchProducts = async () => {
     setLoading(true);
