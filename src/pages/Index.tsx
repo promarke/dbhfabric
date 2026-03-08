@@ -199,6 +199,7 @@ const Index = () => {
           </button>
         )}
 
+        <AnalysisProgress imageCount={images.length} isActive={isAnalyzing} />
         <AnalysisDisplay results={analysisResults} isLoading={isAnalyzing} error={error} />
         <StyleGuide />
 
