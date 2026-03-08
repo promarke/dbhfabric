@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ImageUploader from "@/components/ImageUploader";
 import AnalysisDisplay, { AnalysisResult } from "@/components/AnalysisDisplay";
+import AnalysisProgress from "@/components/AnalysisProgress";
 import HistoryPanel from "@/components/HistoryPanel";
 import FeatureModal from "@/components/FeatureModal";
 import StyleGuide from "@/components/StyleGuide";
@@ -198,6 +199,7 @@ const Index = () => {
           </button>
         )}
 
+        <AnalysisProgress imageCount={images.length} isActive={isAnalyzing} />
         <AnalysisDisplay results={analysisResults} isLoading={isAnalyzing} error={error} />
         <StyleGuide />
 
