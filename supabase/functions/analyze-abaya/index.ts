@@ -377,7 +377,23 @@ serve(async (req) => {
 
     const [categoryResult, correctionHint] = await Promise.all([categoryPromise, correctionPromise]);
 
-    // ===== STEP 2: Full analysis =====
+    // Parse category result
+    if (categoryResult.error) {
+      return new Response(JSON.stringify({ error: categoryResult.error }), {
+        status: categoryResult.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let categoryData: { category_en?: string; reasoning?: string };
+    try {
+      categoryData = parseJSON(categoryResult.content || "");
+    } catch {
+      console.error("Failed to parse category:", categoryResult.content);
+      throw new Error("ক্যাটাগরি শনাক্ত করতে ব্যর্থ। আবার চেষ্টা করুন।");
+    }
+
+    const detectedCategory = (categoryData.category_en || "ABAYA").toUpperCase().trim();
     console.log("Step 2: Full analysis with category:", detectedCategory);
     const analysisResult = await callAI(
       LOVABLE_API_KEY,
