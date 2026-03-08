@@ -13,6 +13,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFeatured, onEdit }) => {
   const [showVariants, setShowVariants] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <>
