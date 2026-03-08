@@ -217,6 +217,9 @@ const Inventory = () => {
           editProduct={editProduct}
         />
       )}
+
+      <CSVImportModal open={showImport} onOpenChange={setShowImport} onImported={fetchProducts} />
+      <CatalogModal open={showCatalog} onOpenChange={setShowCatalog} products={products} />
     </div>
   );
 };
