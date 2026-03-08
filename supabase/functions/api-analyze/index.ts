@@ -337,7 +337,7 @@ serve(async (req) => {
     // ===== STEP 1 + Corrections: Run in PARALLEL =====
     const categoryPromise = callAI(
       LOVABLE_API_KEY,
-      "google/gemini-2.5-flash",
+      "google/gemini-2.5-pro",
       buildCategoryPrompt(),
       "Look at this garment image. Follow the decision tree steps 1-20 IN ORDER. Stop at the FIRST match. Do NOT default to ABAYA. Return the JSON.",
       imageDataUrl,
@@ -382,6 +382,24 @@ serve(async (req) => {
     })();
 
     const [categoryResult, correctionHint] = await Promise.all([categoryPromise, correctionPromise]);
+
+    // Parse category result
+    if (categoryResult.error) {
+      return new Response(JSON.stringify({ success: false, error: categoryResult.error }), {
+        status: categoryResult.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let categoryData: { category_en?: string; reasoning?: string };
+    try {
+      categoryData = parseJSON(categoryResult.content || "");
+    } catch {
+      console.error("Failed to parse category:", categoryResult.content);
+      throw new Error("Category detection failed.");
+    }
+
+    const detectedCategory = (categoryData.category_en || "ABAYA").toUpperCase().trim();
 
     // ===== STEP 2: Full analysis =====
     const analysisResult = await callAI(
