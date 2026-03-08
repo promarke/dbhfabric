@@ -134,7 +134,13 @@ const Inventory = () => {
             <h1 className="text-3xl font-display font-bold flex items-center gap-2">
               <Package className="w-7 h-7" /> Inventory
             </h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button onClick={() => setShowCatalog(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 text-sm font-medium transition-colors">
+                <Share2 className="w-4 h-4" /> Catalog
+              </button>
+              <button onClick={() => setShowImport(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 text-sm font-medium transition-colors">
+                <Upload className="w-4 h-4" /> Import
+              </button>
               <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-foreground/10 hover:bg-primary-foreground/20 text-sm font-medium transition-colors">
                 <Download className="w-4 h-4" /> CSV
               </button>
