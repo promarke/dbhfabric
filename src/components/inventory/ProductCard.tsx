@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Star, Trash2, Edit2, Package } from "lucide-react";
+import { Star, Trash2, Edit2, Package, Eye } from "lucide-react";
 import type { Product } from "@/pages/Inventory";
 import VariantManager from "./VariantManager";
+import ProductDetailModal from "./ProductDetailModal";
 
 interface ProductCardProps {
   product: Product;
@@ -12,17 +13,20 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFeatured, onEdit }) => {
   const [showVariants, setShowVariants] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <>
       <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-accent/40 transition-colors group">
-        {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover bg-muted/30" />
-        ) : (
-          <div className="w-full h-40 bg-muted/30 flex items-center justify-center text-muted-foreground text-sm">
-            No Image
-          </div>
-        )}
+        <button onClick={() => setShowDetail(true)} className="w-full cursor-pointer">
+          {product.image_url ? (
+            <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover bg-muted/30" />
+          ) : (
+            <div className="w-full h-40 bg-muted/30 flex items-center justify-center text-muted-foreground text-sm">
+              No Image
+            </div>
+          )}
+        </button>
         <div className="p-3 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
@@ -57,6 +61,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFe
           <p className="text-[10px] text-muted-foreground">{product.fabric_type} · {product.sizes.length} sizes</p>
 
           <div className="flex items-center gap-1 pt-1 border-t border-border">
+            <button onClick={() => setShowDetail(true)} className="flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
+              <Eye className="w-3 h-3" /> Details
+            </button>
             <button onClick={() => onEdit(product)} className="flex-1 flex items-center justify-center gap-1 text-xs py-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
               <Edit2 className="w-3 h-3" /> Edit
             </button>
@@ -78,6 +85,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onDelete, onToggleFe
         onOpenChange={setShowVariants}
         productId={product.id}
         productName={product.name}
+      />
+
+      <ProductDetailModal
+        open={showDetail}
+        onOpenChange={setShowDetail}
+        product={product}
       />
     </>
   );
