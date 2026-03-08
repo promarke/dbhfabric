@@ -43,6 +43,7 @@ const Inventory = () => {
   const [filterCategory, setFilterCategory] = useState("");
   const [showImport, setShowImport] = useState(false);
   const [showCatalog, setShowCatalog] = useState(false);
+  const [stockMap, setStockMap] = useState<Record<string, number>>({});
 
   const fetchProducts = async () => {
     setLoading(true);
