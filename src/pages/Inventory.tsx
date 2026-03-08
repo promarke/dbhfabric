@@ -217,6 +217,7 @@ const Inventory = () => {
               <ProductCard
                 key={product.id}
                 product={product}
+                stock={stockMap[product.id] || 0}
                 onDelete={handleDelete}
                 onToggleFeatured={handleToggleFeatured}
                 onEdit={(p) => { setEditProduct(p); setShowAddModal(true); }}
